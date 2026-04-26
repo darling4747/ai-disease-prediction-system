@@ -1,0 +1,217 @@
+symptoms,disease
+fever, cough, fatigue, headache, body ache, sore throat,Flu
+fever, cough, body ache, fatigue, headache,Flu
+cough, sore throat, fatigue, headache, fever,Flu
+fever, cough, shortness of breath, fatigue, loss of taste,COVID-19
+fever, cough, fatigue, loss of smell, shortness of breath,COVID-19
+cough, fever, fatigue, loss of taste, loss of smell,COVID-19
+runny nose, sneezing, sore throat, cough, congestion,Cold
+sneezing, runny nose, sore throat, mild cough,Cold
+congestion, runny nose, sneezing, sore throat,Cold
+sneezing, itchy eyes, runny nose, rash, hives,Allergy
+itchy eyes, sneezing, runny nose, skin rash,Allergy
+rash, hives, itchy eyes, sneezing,Allergy
+headache, nausea, vomiting, sensitivity to light, sensitivity to sound,Migraine
+severe headache, nausea, sensitivity to light,Migraine
+headache, vomiting, sensitivity to sound, nausea,Migraine
+nausea, vomiting, diarrhea, stomach cramps, fever,Food Poisoning
+vomiting, diarrhea, stomach pain, nausea,Food Poisoning
+stomach cramps, nausea, vomiting, diarrhea,Food Poisoning
+fever, cough, shortness of breath, chest pain, fatigue,Pneumonia
+cough, fever, chest pain, shortness of breath,Pneumonia
+fever, fatigue, cough, chest discomfort,Pneumonia
+cough, shortness of breath, chest discomfort, fatigue, mucus,Bronchitis
+persistent cough, chest discomfort, fatigue,Bronchitis
+cough with mucus, shortness of breath, fatigue,Bronchitis
+headache, facial pain, nasal congestion, thick nasal discharge,Sinusitis
+facial pressure, headache, nasal congestion,Sinusitis
+headache, stuffy nose, facial pain,Sinusitis
+painful urination, frequent urination, back pain, fever,UTI
+burning urination, frequent urination, lower back pain,UTI
+painful urination, urgency, fever,UTI
+joint pain, stiffness, swelling, reduced range of motion,Arthritis
+joint stiffness, pain, swelling in joints,Arthritis
+joint pain, morning stiffness, swelling,Arthritis
+increased thirst, frequent urination, extreme hunger, weight loss,Diabetes
+thirst, frequent urination, unexplained weight loss,Diabetes
+excessive hunger, fatigue, blurred vision, frequent urination,Diabetes
+headache, shortness of breath, nosebleeds, chest pain,Hypertension
+headache, dizziness, nosebleeds,Hypertension
+chest pain, shortness of breath, headache,Hypertension
+persistent sadness, loss of interest, sleep changes, appetite changes,Depression
+sadness, fatigue, loss of interest, sleep problems,Depression
+loss of appetite, sadness, sleep disturbances,Depression
+excessive worry, restlessness, fatigue, difficulty concentrating,Anxiety
+worry, restlessness, fatigue, concentration problems,Anxiety
+nervousness, restlessness, excessive worry,Anxiety
+nausea, vomiting, diarrhea, stomach cramps, fever,Gastroenteritis
+vomiting, diarrhea, abdominal pain, fever,Gastroenteritis
+stomach cramps, nausea, vomiting, diarrhea,Gastroenteritis
+itchy skin, dry skin, red patches, thickened skin,Eczema
+skin itching, dry patches, red skin,Eczema
+itchy rash, dry skin, red patches,Eczema
+pimples, blackheads, whiteheads, oily skin, red skin,Acne
+pimples, oily skin, blackheads,Acne
+whiteheads, pimples, red skin,Acne
+ear pain, difficulty hearing, fever, ear drainage,Ear Infection
+ear pain, hearing loss, fever,Ear Infection
+ear discomfort, fever, ear discharge,Ear Infection
+red eyes, eye discharge, itchy eyes, tearing,Conjunctivitis
+pink eye, eye discharge, redness,Conjunctivitis
+itchy eyes, red eyes, tearing,Conjunctivitis
+back pain, painful urination, blood in urine, nausea,Kidney Stones
+severe back pain, painful urination, blood in urine,Kidney Stones
+flank pain, hematuria, nausea,Kidney Stones
+fatigue, weakness, pale skin, shortness of breath, dizziness,Anemia
+tiredness, pale skin, shortness of breath,Anemia
+weakness, dizziness, pale skin, fatigue,Anemia
+difficulty falling asleep, waking up frequently, daytime fatigue,Insomnia
+sleep problems, daytime tiredness, difficulty staying asleep,Insomnia
+can't sleep, fatigue during day,Insomnia
+abdominal pain, nausea, vomiting, fever, loss of appetite,Appendicitis
+stomach pain, fever, vomiting, loss of appetite,Appendicitis
+right lower quadrant pain, fever, nausea,Appendicitis
+abdominal pain, fever, nausea, change in bowel habits,Diverticulitis
+left lower quadrant pain, fever, change in bowel habits,Diverticulitis
+abdominal discomfort, fever, diarrhea,Diverticulitis
+abdominal pain, bloating, gas, diarrhea, constipation,Irritable Bowel Syndrome
+stomach pain, bloating, alternating diarrhea constipation,IBS
+abdominal discomfort, gas, bowel changes,Irritable Bowel Syndrome
+red patches, silvery scales, dry skin, itching, burning,Psoriasis
+scaly patches, red skin, itching,Psoriasis
+silver scales, red patches, dry skin,Psoriasis
+facial redness, visible blood vessels, bumps, eye irritation,Rosacea
+red face, visible veins, bumps,Rosacea
+facial flushing, redness, eye irritation,Rosacea
+painful rash, blisters, burning, numbness, itching,Shingles
+blisters, burning pain, numbness,Shingles
+painful rash, burning sensation,Shingles
+itchy rash, blisters, fever, headache, fatigue,Chickenpox
+blisters, fever, fatigue, itching,Chickenpox
+rash, fever, tiredness,Chickenpox
+fever, cough, runny nose, rash, red eyes,Measles
+rash, fever, cough, conjunctivitis,Measles
+red eyes, rash, fever,Measles
+swollen salivary glands, fever, headache, muscle aches, fatigue,Mumps
+parotid swelling, fever, headache,Mumps
+swollen glands, fever, fatigue,Mumps
+rash, fever, headache, red eyes, joint pain,Rubella
+rash, low fever, joint pain,Rubella
+red eyes, rash, fever,Rubella
+severe coughing, whooping sound, vomiting, exhaustion,Whooping Cough
+paroxysmal cough, whoop, vomiting,Whooping Cough
+severe cough spells, exhaustion,Whooping Cough
+sore throat, fever, swollen glands, difficulty breathing,Diphtheria
+throat pain, fever, neck swelling,Diphtheria
+sore throat, fever, difficulty swallowing,Diphtheria
+muscle stiffness, spasms, jaw cramping, difficulty swallowing,Tetanus
+muscle rigidity, lockjaw, spasms,Tetanus
+jaw stiffness, muscle spasms,Tetanus
+fever, headache, muscle weakness, paralysis,Polio
+fever, muscle pain, weakness,Polio
+headache, fever, paralysis,Polio
+fever, chills, headache, nausea, vomiting, diarrhea,Malaria
+fever, chills, body aches, headache,Malaria
+headache, fever, chills, vomiting,Malaria
+high fever, severe headache, pain behind eyes, joint pain, rash,Dengue
+fever, headache, joint pain, rash,Dengue
+severe headache, high fever, joint pain,Dengue
+fever, rash, joint pain, red eyes, headache,Zika
+rash, fever, joint pain, red eyes,Zika
+fever, joint pain, rash,Zika
+fever, headache, muscle pain, vomiting, diarrhea, bleeding,Ebola
+fever, headache, muscle pain, vomiting,Ebola
+fever, muscle pain, diarrhea,Ebola
+persistent cough, weight loss, fever, night sweats, fatigue,Tuberculosis
+chronic cough, weight loss, night sweats,Tuberculosis
+cough, fever, weight loss,Tuberculosis
+fever, fatigue, swollen lymph nodes, weight loss, opportunistic infections,HIV/AIDS
+fever, fatigue, weight loss, swollen glands,HIV
+fatigue, fever, opportunistic infections,HIV
+fatigue, nausea, abdominal pain, loss of appetite, yellow skin,Hepatitis A
+nausea, abdominal pain, jaundice, fever,Hepatitis A
+yellow skin, nausea, fatigue,Hepatitis A
+fatigue, nausea, abdominal pain, dark urine, yellow skin,Hepatitis B
+abdominal pain, dark urine, jaundice,Hepatitis B
+yellow skin, fatigue, nausea,Hepatitis B
+fatigue, nausea, abdominal pain, dark urine, yellow skin,Hepatitis C
+abdominal pain, dark urine, jaundice,Hepatitis C
+yellow skin, fatigue, nausea,Hepatitis C
+painful blisters, burning, itching, fever, body aches,Herpes
+blisters, burning, itching, fever,Herpes
+painful sores, fever, body aches,Herpes
+genital warts, cervical cancer, other cancers,HPV
+genital warts, abnormal pap smear,HPV
+warts, cervical changes,HPV
+sores, rash, fever, swollen lymph nodes, organ damage,Syphilis
+sores, rash, fever,Syphilis
+ulcers, rash, fever,Syphilis
+burning urination, discharge, painful intercourse, testicular pain,Gonorrhea
+burning urination, discharge, painful urination,Gonorrhea
+urethral discharge, burning urination,Gonorrhea
+burning urination, discharge, painful intercourse, testicular pain,Chlamydia
+burning urination, discharge, painful urination,Chlamydia
+urethral discharge, burning urination,Chlamydia
+vaginal discharge, vaginal odor, vaginal itching, painful urination,Trichomoniasis
+vaginal discharge, itching, painful urination,Trichomoniasis
+vaginal odor, discharge, discomfort,Trichomoniasis
+vaginal discharge, vaginal odor, vaginal itching,Bacterial Vaginosis
+discharge, odor, itching,Bacterial Vaginosis
+vaginal odor, discharge,Bacterial Vaginosis
+vaginal itching, vaginal discharge, vaginal odor, painful urination,Yeast Infection
+vaginal itching, discharge, burning,Yeast Infection
+vaginal discharge, itching, burning,Yeast Infection
+pelvic pain, painful periods, painful intercourse, excessive bleeding,Endometriosis
+pelvic pain, painful periods, heavy bleeding,Endometriosis
+menstrual pain, painful intercourse,Endometriosis
+irregular periods, excess hair growth, acne, obesity, infertility,PCOS
+irregular periods, acne, excess hair,PCOS
+menstrual irregularities, acne, weight gain,PCOS
+heavy bleeding, pelvic pain, frequent urination, constipation,Fibroids
+heavy periods, pelvic pain, pressure symptoms,Fibroids
+menstrual bleeding, abdominal pressure,Fibroids
+pelvic pain, bloating, painful intercourse, irregular periods,Ovarian Cysts
+pelvic pain, bloating, menstrual changes,Ovarian Cysts
+abdominal pain, menstrual irregularities,Ovarian Cysts
+abdominal pain, vaginal bleeding, shoulder pain, dizziness,Ectopic Pregnancy
+abdominal pain, vaginal bleeding, dizziness,Ectopic Pregnancy
+pelvic pain, vaginal bleeding,Ectopic Pregnancy
+vaginal bleeding, abdominal cramping, back pain, loss of pregnancy symptoms,Miscarriage
+vaginal bleeding, abdominal pain, pregnancy loss,Miscarriage
+bleeding, cramping, loss of pregnancy,Miscarriage
+contractions, back pain, pelvic pressure, vaginal discharge,Preterm Labor
+contractions, pelvic pressure, back pain,Preterm Labor
+uterine contractions, back pain,Preterm Labor
+high blood pressure, protein in urine, swelling, headache, vision changes,Preeclampsia
+high blood pressure, swelling, headache,Preeclampsia
+proteinuria, hypertension, swelling,Preeclampsia
+increased thirst, frequent urination, fatigue, blurred vision,Gestational Diabetes
+thirst, frequent urination, fatigue,Gestational Diabetes
+increased hunger, fatigue, blurred vision,Gestational Diabetes
+painless vaginal bleeding, preterm labor, hemorrhage,Placenta Previa
+vaginal bleeding, painless bleeding,Placenta Previa
+bleeding without pain,Placenta Previa
+vaginal bleeding, abdominal pain, back pain, uterine tenderness,Placental Abruption
+vaginal bleeding, abdominal pain, uterine tenderness,Placental Abruption
+bleeding with pain, uterine tenderness,Placental Abruption
+no fetal movement, no heartbeat, uterine size smaller than expected,Stillbirth
+no fetal movement, decreased fetal movement,Stillbirth
+absence of fetal heartbeat,Stillbirth
+fever, lethargy, poor feeding, breathing difficulties, seizures,Neonatal Sepsis
+fever, poor feeding, lethargy,Neonatal Sepsis
+temperature instability, poor feeding,Neonatal Sepsis
+yellow skin, yellow eyes, dark urine, pale stools,Neonatal Jaundice
+yellow skin, yellow eyes,Neonatal Jaundice
+jaundice, dark urine,Neonatal Jaundice
+lethargy, poor feeding, seizures, coma,Neonatal Hypoglycemia
+poor feeding, lethargy, seizures,Neonatal Hypoglycemia
+low blood sugar, poor feeding,Neonatal Hypoglycemia
+rapid breathing, grunting, nasal flaring, chest retractions,Neonatal Respiratory Distress
+fast breathing, grunting, chest retractions,Neonatal Respiratory Distress
+respiratory distress, grunting,Neonatal Respiratory Distress
+fever, lethargy, poor feeding, seizures, bulging fontanelle,Neonatal Meningitis
+fever, poor feeding, seizures,Neonatal Meningitis
+lethargy, fever, seizures,Neonatal Meningitis
+fever, cough, rapid breathing, grunting, chest retractions,Neonatal Pneumonia
+fever, cough, respiratory distress,Neonatal Pneumonia
+cough, fever, breathing difficulties,Neonatal Pneumonia

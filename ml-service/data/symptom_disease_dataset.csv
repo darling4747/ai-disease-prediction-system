@@ -1,0 +1,33 @@
+fever,cough,headache,fatigue,nausea,chest_pain,shortness_of_breath,sore_throat,body_aches,diarrhea,dizziness,skin_rash,abdominal_pain,loss_of_appetite,disease
+1,1,0,1,0,0,0,1,0,0,0,0,0,0,Common Cold
+1,1,1,1,0,0,0,0,1,0,0,0,0,0,Flu
+0,0,0,1,1,0,0,0,0,1,0,0,1,1,Food Poisoning
+1,1,1,1,0,1,1,0,0,0,1,0,0,0,COVID-19
+0,0,1,1,1,0,0,0,0,0,1,0,0,0,Migraine
+1,1,0,1,0,0,1,0,0,0,0,0,0,1,Pneumonia
+0,0,0,1,1,0,0,0,0,1,0,0,1,1,Gastroenteritis
+0,1,0,1,0,0,0,1,0,0,0,0,0,0,Bronchitis
+0,0,1,0,1,1,1,0,0,0,1,0,0,0,Heart Attack
+1,1,1,1,0,0,0,0,1,0,0,0,0,0,Influenza
+0,1,0,0,0,0,0,1,0,0,0,0,0,0,Sore Throat
+1,0,1,1,0,0,0,0,0,0,1,0,0,1,Dengue
+0,0,1,0,0,0,0,0,0,0,1,0,0,0,Tension Headache
+1,1,0,1,0,0,0,0,1,0,0,0,0,0,Seasonal Flu
+0,0,0,1,0,0,0,0,0,0,0,1,0,0,Allergic Reaction
+1,1,1,1,0,0,0,1,1,0,0,0,0,0,Viral Infection
+0,1,0,0,0,0,0,1,0,0,0,0,0,0,Strep Throat
+1,0,0,1,0,0,0,0,0,0,0,0,0,1,Typhoid
+0,0,1,1,0,0,0,0,0,0,0,0,0,0,Sinusitis
+1,1,0,1,0,0,0,0,1,0,0,0,0,0,Respiratory Infection
+0,0,0,0,1,0,0,0,0,1,0,0,1,1,Food Allergy
+1,1,1,1,0,0,0,0,1,0,0,0,0,0,Bacterial Infection
+0,0,1,1,0,0,0,0,0,0,1,0,0,0,Vertigo
+1,0,1,1,0,0,0,0,0,0,0,0,0,0,Malaria
+0,1,0,1,0,0,0,0,0,0,0,0,0,0,Asthma
+1,1,1,1,0,0,0,1,1,0,0,0,0,0,Upper Respiratory Infection
+0,0,0,1,0,0,0,0,0,0,0,0,0,0,Chronic Fatigue
+1,0,0,1,0,0,0,0,0,0,0,0,0,0,Heat Exhaustion
+0,0,1,0,1,0,0,0,0,0,1,0,0,0,Motion Sickness
+1,1,0,1,0,0,0,0,0,0,0,0,0,0,Mononucleosis
+0,0,1,1,0,0,0,0,0,0,0,0,0,0,Dehydration
+1,1,1,1,0,0,0,0,1,0,0,0,0,0,Systemic Infection
