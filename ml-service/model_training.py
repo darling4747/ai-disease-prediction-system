@@ -7,8 +7,6 @@ import pandas as pd
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 
 def train_and_evaluate():
@@ -19,25 +17,32 @@ def train_and_evaluate():
     predictor = DiseasePredictor()
     
     # Load data
-    print("Loading dataset...")
-    df = predictor.load_data('data/symptom_disease_dataset.csv')
-    print(f"Dataset loaded with {len(df)} records and {len(df.columns)} columns")
+    print("Loading training dataset...")
+    df_train = predictor.load_data('Training.csv')
+    print(f"Training dataset loaded with {len(df_train)} records and {len(df_train.columns)} columns")
+    
+    print("Loading testing dataset...")
+    df_test = predictor.load_data('Testing.csv')
+    print(f"Testing dataset loaded with {len(df_test)} records and {len(df_test.columns)} columns")
     
     # Display dataset info
-    print("\nDataset Info:")
-    print(df.head())
-    print(f"\nDisease distribution:")
-    print(df['disease'].value_counts())
+    print("\nTraining Dataset Info:")
+    print(df_train.head())
+    print(f"\nTraining Disease distribution:")
+    print(df_train['prognosis'].value_counts())
     
-    # Preprocess data
-    print("\nPreprocessing data...")
-    X, y = predictor.preprocess_data(df)
+    print("\nTesting Dataset Info:")
+    print(df_test.head())
+    print(f"\nTesting Disease distribution:")
+    print(df_test['prognosis'].value_counts())
     
-    # Split data for evaluation
-    from sklearn.model_selection import train_test_split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
+    # Preprocess training data
+    print("\nPreprocessing training data...")
+    X_train, y_train = predictor.preprocess_data(df_train)
+    
+    # Preprocess testing data
+    print("Preprocessing testing data...")
+    X_test, y_test = predictor.preprocess_data(df_test)
     
     # Hyperparameter tuning
     print("\nPerforming hyperparameter tuning...")
@@ -119,4 +124,5 @@ if __name__ == "__main__":
     print("\nTraining completed successfully!")
     print("Files created:")
     print("  - model/disease_predictor.pkl (trained model)")
-    print("  - data/symptom_disease_dataset.csv (dataset)")
+    print("  - Training on: Training.csv")
+    print("  - Tested on: Testing.csv")

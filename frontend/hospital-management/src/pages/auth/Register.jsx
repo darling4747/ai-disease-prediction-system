@@ -11,19 +11,21 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'patient'
+    role: 'PATIENT'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,13 +34,6 @@ const Register = () => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
-    });
-  };
-
-  const handleRoleChange = (e) => {
-    setFormData({
-      ...formData,
-      role: e.target.value
     });
   };
 
@@ -54,36 +49,14 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
-      }
-
-      const data = await response.json();
-      
-      // Auto-login after registration
-      localStorage.setItem('user', JSON.stringify({
+      const data = await register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
-        role: formData.role,
-        token: data.token,
-        userId: data.userId
-      }));
-      
-      navigate('/');
+        password: formData.password,
+        role: formData.role
+      });
+      navigate(data?.role === 'ADMIN' ? '/admin' : '/dashboard');
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
@@ -136,17 +109,18 @@ const Register = () => {
             margin="normal"
             required
           />
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Role</InputLabel>
+          <FormControl fullWidth margin="normal" required>
+            <InputLabel id="role-select-label">Role</InputLabel>
             <Select
+              labelId="role-select-label"
+              label="Role"
               name="role"
               value={formData.role}
-              onChange={handleRoleChange}
-              required
+              onChange={handleChange}
             >
-              <MenuItem value="patient">Patient</MenuItem>
-              <MenuItem value="doctor">Doctor</MenuItem>
-              <MenuItem value="admin">Administrator</MenuItem>
+              <MenuItem value="PATIENT">Patient</MenuItem>
+              <MenuItem value="DOCTOR">Doctor</MenuItem>
+              <MenuItem value="ADMIN">Admin</MenuItem>
             </Select>
           </FormControl>
           <TextField

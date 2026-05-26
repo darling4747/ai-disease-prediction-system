@@ -62,10 +62,10 @@ services:
     container_name: hospital-frontend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3000:80"
     environment:
-      REACT_APP_API_URL: http://localhost:8080
-      REACT_APP_ML_SERVICE_URL: http://localhost:5000
+      REACT_APP_API_URL: http://backend:8080
+      REACT_APP_ML_SERVICE_URL: http://ml-service:5000
     depends_on:
       - backend
     networks:

@@ -1,281 +1,233 @@
-# AI-Driven Hospital Management System
+# AI-Driven Disease Diagnosis and Smart Hospital Recommendation System
 
-An intelligent healthcare management system that integrates machine learning with a full-stack web application to improve clinical decision-making. Instead of a traditional CRUD system, it allows users to input patient symptoms, uses a trained ML model to predict the most likely disease, and then recommends the appropriate doctor specialization and hospital/department.
+An advanced healthcare support platform that provides intelligent disease prediction and complete healthcare management using machine learning and AI-driven decision support. The system analyzes user symptoms with models such as **Logistic Regression**, **Naive Bayes**, **Support Vector Machine (SVM)**, and **Random Forest**. **Random Forest** is the primary production model because of its high accuracy and efficient handling of high-dimensional symptom data.
 
-## 🏗️ Architecture
+The platform integrates **frontend**, **backend**, **machine learning**, **MongoDB**, and a **goal-based AI healthcare assistant** into a scalable smart healthcare ecosystem suitable for real-world and enterprise-style deployment.
+
+## Smart Modules
+
+| Module | Description | In this project |
+|--------|-------------|-----------------|
+| **AI Agent** | Symptom intake, ML analysis, guided care chat | `/` — `DiseasePrediction.jsx` + `healthcareAgent.js` |
+| **Appointment Booking** | Schedule doctor visits | `/appointments` (PATIENT) |
+| **Emergency Alert** | Critical symptom detection and urgent banners | `emergencyDetection.js`, `EmergencyAlert.jsx`, `riskLevel.js` |
+| **Doctor Dashboard** | Cases, medical advice, appointments | `/doctor-dashboard` (DOCTOR, ADMIN) |
+| **Health Report** | Printable prediction summaries | `/health-report`, `/health-report/:id` |
+| **Prediction History** | MongoDB-backed history | `/history` |
+| **Medicine Recommendation** | Medicines and precautions by disease | `/medicines` + `diseaseMap.js` |
+| **Analytics Dashboard** | Disease trends and model accuracy charts | `/dashboard` + `AnalyticsCharts.jsx` (Recharts) |
+
+Together, these modules extend the project beyond a simple ML form into a full **AI-driven smart healthcare** application.
+
+## Architecture
 
 ### Technology Stack
-- **Frontend**: React 18 + TypeScript + Material-UI
-- **Backend**: Spring Boot 3.2.0 + Java 17
-- **Database**: MongoDB
-- **ML Service**: Python Flask + Scikit-learn
-- **Containerization**: Docker + Docker Compose
+
+| Layer | Stack |
+|-------|--------|
+| **Frontend** | React 18, Material-UI, React Router, Axios, Recharts (CureAI UI) |
+| **Backend** | Spring Boot 3.2, Java 17, Spring Security, JWT |
+| **Database** | MongoDB |
+| **ML Service** | Python, Flask, Scikit-learn (Random Forest) |
+| **Deployment** | Docker Compose, Nginx (frontend container) |
 
 ### System Flow
-1. **User Input**: Patients enter symptoms through React frontend
-2. **ML Prediction**: Python ML service analyzes symptoms and predicts diseases
-3. **Recommendations**: System suggests doctor specializations and hospital departments
-4. **Storage**: All predictions are stored in MongoDB for history tracking
-5. **Doctor/Hospital Search**: Users can find appropriate healthcare providers
 
-## 📁 Project Structure
+1. **Authentication** — Users register/login; JWT secures API access by role (PATIENT, DOCTOR, ADMIN).
+2. **Symptom input** — Patient or clinician selects symptoms on the AI Diagnosis page.
+3. **ML prediction** — Backend proxies to the ML service; Random Forest returns ranked diseases with confidence.
+4. **AI agent** — Assistant summarizes the top prediction, doctor specialization, and hospital department.
+5. **Emergency guidance** — Critical or high-risk patterns trigger urgent-care messaging.
+6. **Recommendations** — Doctors and hospitals filtered by specialization and department.
+7. **Persistence** — Predictions, appointments, doctors, and hospitals stored in MongoDB.
+8. **Analytics** — Dashboard aggregates predictions, appointments, and network stats.
+
+### AI Agent
+
+The **Goal-Based Healthcare Assistant Agent** aims to predict likely diseases from symptoms and recommend the next healthcare action. It:
+
+- Collects and preprocesses symptom inputs
+- Uses ML output (primary: **Random Forest**) ranked by confidence
+- Produces **disease prediction**, **doctor specialization**, and **hospital/department** suggestions
+- Supports conversational follow-up (appointments, emergencies, referrals)
+
+## Project Structure
 
 ```
 idp/
-├── backend/                    # Spring Boot API
-│   ├── src/main/java/com/example/hospital/
-│   │   ├── controller/         # REST API endpoints
-│   │   ├── service/           # Business logic
-│   │   ├── model/             # Data models (Doctor, Hospital, Prediction)
-│   │   └── repository/        # Data access layer
-│   └── src/main/resources/
-│       └── application.properties # Configuration
-├── frontend/hospital-management/ # React TypeScript App
-│   ├── src/
-│   │   ├── assets/           # Static files
-│   │   ├── components/       # Reusable UI components
-│   │   │   ├── layout/     # Navigation and layout
-│   │   │   ├── ui/         # Basic UI components
-│   │   │   └── dashboard/  # Dashboard widgets
-│   │   ├── pages/           # Screen components
-│   │   │   ├── auth/       # Login/Register
-│   │   │   ├── dashboard/  # Main dashboard
-│   │   │   ├── patients/   # Disease prediction, history, recommendations
-│   │   │   ├── doctors/    # Doctor listings
-│   │   │   └── hospitals/ # Hospital listings
-│   │   ├── services/         # API service layer
-│   │   ├── context/          # Global state management
-│   │   ├── hooks/            # Custom React hooks
-│   │   ├── utils/            # Helper functions
-│   │   └── routes/           # App routing
-│   └── package.json
-├── ml-service/                 # Python ML API
-│   ├── api/                   # Flask API endpoints
-│   ├── model/                  # Trained ML models
-│   ├── data/                   # Training datasets
-│   ├── predict_disease.py      # ML prediction logic
-│   ├── model_training.py       # Model training script
-│   └── requirements.txt        # Python dependencies
-├── docker-compose.yml           # Container orchestration
-└── README.md                 # This file
+├── backend/                         # Spring Boot REST API
+│   └── src/main/java/com/example/hospital/
+│       ├── controller/              # Auth, predictions, doctors, appointments, ML, admin
+│       ├── service/                 # Business logic + JWT
+│       ├── config/                  # Security, JWT filter, data seeding
+│       └── model/                   # Doctor, Hospital, Prediction, Appointment
+├── frontend/hospital-management/    # React (CureAI)
+│   └── src/
+│       ├── pages/patients/          # AI Diagnosis, history, recommendations
+│       ├── pages/dashboard/         # Analytics dashboard
+│       ├── pages/appointments/      # Booking
+│       ├── pages/admin/             # Admin panel
+│       └── services/                # API clients (apiConfig.jsx)
+├── ml-service/
+│   ├── api/ml_api.py                # Flask prediction API (Docker default)
+│   ├── predict_disease.py           # Random Forest training & inference
+│   └── model_training.py            # GridSearchCV tuning
+├── docker-compose.yml
+├── LOCAL_SETUP.md                   # Run without Docker
+├── PUBLIC_DEPLOYMENT.md             # LAN / public access
+└── README.md
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
-- Docker and Docker Compose
-- Node.js 18+ (for local frontend development)
-- Java 17+ (for local backend development)
-- Python 3.8+ (for local ML service development)
 
-### Using Docker (Recommended)
+- Docker and Docker Compose (recommended), or see [LOCAL_SETUP.md](LOCAL_SETUP.md)
+- Node.js 18+, Java 17+, Python 3.9+ for local development
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repository-url>
-   cd idp
-   ```
+### Docker (recommended)
 
-2. **Start all services**:
-   ```bash
-   docker-compose up --build
-   ```
+```bash
+git clone <repository-url>
+cd idp
+docker-compose up --build
+```
 
-3. **Access the application**:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8080
-   - ML Service: http://localhost:5000
-   - MongoDB: mongodb://localhost:27017
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8080 |
+| ML Service | http://localhost:5000 |
+| MongoDB | mongodb://localhost:27017 |
 
-### Local Development
+Windows: use `start-all.bat` for local services or `start-public.bat` for LAN access (see [PUBLIC_DEPLOYMENT.md](PUBLIC_DEPLOYMENT.md)).
 
-#### Backend (Spring Boot)
+### Local development
+
+**Backend**
+
 ```bash
 cd backend
 ./mvnw spring-boot:run
 ```
 
-#### Frontend (React)
+**Frontend**
+
 ```bash
 cd frontend/hospital-management
 npm install
 npm start
 ```
 
-#### ML Service (Python)
+Copy `.env.example` to `.env` and set `REACT_APP_API_URL` if needed.
+
+**ML service**
+
 ```bash
 cd ml-service
 pip install -r requirements.txt
 python api/ml_api.py
 ```
 
-## 🔧 Configuration
+## User Roles
 
-### Environment Variables
+| Role | Capabilities |
+|------|----------------|
+| **PATIENT** | AI diagnosis, history, recommendations, appointment booking |
+| **DOCTOR** | View all patient predictions/cases, dashboard, appointments |
+| **ADMIN** | Full analytics, doctor/hospital CRUD, admin panel, ML admin endpoints |
 
-#### Backend (application.properties)
-- `SPRING_DATA_MONGODB_URI`: MongoDB connection string
-- `ML_SERVICE_URL`: ML service endpoint
+Default seeded accounts are created by `DataSeeder.java` on first run (see LOCAL_SETUP.md).
 
-#### Frontend (.env)
-- `REACT_APP_API_URL`: Backend API URL
-- `REACT_APP_ML_SERVICE_URL`: ML service URL
+## Machine Learning
 
-#### ML Service
-- `FLASK_ENV`: Environment (development/production)
-- `PYTHONPATH`: Python path
+- **Primary model**: Random Forest (`RandomForestClassifier`) with optional GridSearchCV in `model_training.py`
+- **Supporting models** (design/evaluation): Logistic Regression, Naive Bayes, SVM — documented for comparative study; production inference uses the trained Random Forest artifact (`disease_predictor.pkl`)
+- **Output**: Ranked diseases, confidence, severity, doctor specialization, hospital department, and care recommendations
 
-## 📊 Features
+## API Overview
 
-### Core Functionality
-- ✅ **Symptom-based Disease Prediction**: AI-powered disease prediction
-- ✅ **Doctor Specialization Mapping**: Automatic doctor type recommendations
-- ✅ **Hospital Department Recommendations**: Department suggestions based on disease
-- ✅ **Prediction History**: Complete tracking of all predictions
-- ✅ **Doctor Search**: Find doctors by specialization, location, rating
-- ✅ **Hospital Search**: Find hospitals with services and departments
-- ✅ **Appointment Booking**: Schedule appointments with doctors
-- ✅ **Analytics Dashboard**: System overview and statistics
+### Backend (authenticated unless noted)
 
-### ML Model Features
-- **Diseases Supported**: Common Cold, Flu, COVID-19, Migraine, Pneumonia, etc.
-- **Symptoms**: Fever, Cough, Headache, Fatigue, Nausea, Chest Pain, etc.
-- **Accuracy**: Trained on healthcare dataset with 85%+ accuracy
-- **Recommendations**: Maps diseases to appropriate specializations
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/auth/register`, `POST /api/auth/login` | Registration and JWT login |
+| `POST /api/ml/predict` | Symptom-based prediction (via ML service) |
+| `GET/POST /api/predictions/**` | History and save predictions |
+| `GET /api/predictions/user/{userId}/analytics` | User analytics |
+| `GET /api/doctors/**`, `GET /api/hospitals/**` | Provider directory |
+| `POST /appointments/book` | Book appointment (PATIENT) |
+| `GET /appointments/all` | All appointments (DOCTOR, ADMIN) |
+| `GET /api/admin/**` | Admin operations |
 
-### API Endpoints
+### ML service
 
-#### Backend (Spring Boot)
-- `GET /api/doctors` - Get all doctors
-- `GET /api/hospitals` - Get all hospitals
-- `GET /api/predictions` - Get prediction history
-- `POST /api/predictions` - Save prediction
-- `GET /api/predictions/user/{userId}` - User predictions
-- `GET /api/doctors/recommendations` - Get doctor recommendations
+| Endpoint | Description |
+|----------|-------------|
+| `GET /health` | Health check |
+| `POST /predict` | Disease prediction from symptoms |
+| `GET /symptoms`, `GET /diseases` | Supported inputs and labels |
 
-#### ML Service (Python Flask)
-- `GET /health` - Health check
-- `POST /predict` - Disease prediction
-- `GET /symptoms` - Get available symptoms
-- `GET /diseases` - Get supported diseases
-- `GET /model/info` - Model information
+## Disease → Care Mapping (examples)
 
-## 🏥 Disease to Specialization Mapping
-
-| Disease | Recommended Doctor | Hospital Department |
-|----------|-------------------|-------------------|
-| Common Cold | General Practitioner | Outpatient |
-| Flu | General Practitioner | Outpatient |
+| Disease | Doctor | Department |
+|---------|--------|------------|
+| Common Cold / Flu | General Practitioner | Outpatient |
 | COVID-19 | Infectious Disease Specialist | Isolation Ward |
-| Heart Attack | Cardiologist | Cardiology/Emergency |
+| Heart Attack | Cardiologist | Cardiology / Emergency |
 | Migraine | Neurologist | Neurology |
 | Pneumonia | Pulmonologist | Pulmonology |
-| Food Poisoning | Gastroenterologist | Gastroenterology |
 
-## 🔒 Security Considerations
+Full mappings live in `ml-service/predict_disease.py` and `frontend/.../utils/diseaseMap.js`.
 
-- **CORS**: Configured for cross-origin requests
-- **Input Validation**: Symptom input validation
-- **Data Sanitization**: Clean input data before processing
-- **Rate Limiting**: API rate limiting (to be implemented)
-- **Authentication**: JWT-based authentication (to be implemented)
+## Security
 
-## 📈 Monitoring & Logging
+- **JWT authentication** with role-based access (`SecurityConfig`, `JwtAuthenticationFilter`)
+- **BCrypt** password hashing
+- **CORS** configured for frontend origins
+- Input validation on prediction and appointment endpoints
 
-### Backend
-- Spring Boot Actuator endpoints: `/actuator/health`, `/actuator/info`
-- Structured logging with log levels
-- MongoDB query logging
+> This system is for **decision support and education**, not a substitute for licensed medical diagnosis.
 
-### Frontend
-- React error boundaries
-- API request/response logging
-- Performance monitoring
+## Configuration
 
-### ML Service
-- Flask health checks
-- Model performance metrics
-- Prediction logging
+**Backend** (`application.properties`): `SPRING_DATA_MONGODB_URI`, `ML_SERVICE_URL`
 
-## 🧪 Testing
+**Frontend** (`.env`): `REACT_APP_API_URL`, optional `REACT_APP_ML_SERVICE_URL`
 
-### Backend Tests
+**ML service**: `FLASK_ENV`, model path under `ml-service/model/`
+
+## Testing
+
 ```bash
-cd backend
-./mvnw test
+# Backend
+cd backend && ./mvnw test
+
+# Frontend
+cd frontend/hospital-management && npm test
 ```
 
-### Frontend Tests
-```bash
-cd frontend/hospital-management
-npm test
-```
+## Deployment
 
-### ML Service Tests
-```bash
-cd ml-service
-python -m pytest tests/
-```
+- **Docker**: `docker-compose up --build -d`
+- **Public/LAN**: [PUBLIC_DEPLOYMENT.md](PUBLIC_DEPLOYMENT.md)
+- **No Docker**: [LOCAL_SETUP.md](LOCAL_SETUP.md)
 
-## 📦 Deployment
+Production checklist: HTTPS, secrets management, MongoDB backups, model retraining pipeline, monitoring.
 
-### Docker Deployment
-```bash
-# Build and deploy
-docker-compose -f docker-compose.prod.yml up --build -d
-```
+## Troubleshooting
 
-### Production Considerations
-- Use environment-specific configurations
-- Enable HTTPS/SSL certificates
-- Configure reverse proxy (nginx)
-- Set up monitoring and alerting
-- Regular database backups
-- Model retraining pipeline
+| Issue | Check |
+|-------|--------|
+| ML service down | Port 5000, `model/disease_predictor.pkl`, Python deps |
+| DB connection | MongoDB on 27017, URI in `application.properties` |
+| Frontend API errors | `REACT_APP_API_URL`, backend CORS, valid JWT |
+| Docker rebuild | `docker-compose build --no-cache` |
 
-## 🤝 Contributing
+## License
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-**ML Service Not Responding**
-- Check if Flask app is running on port 5000
-- Verify Python dependencies are installed
-- Check ML model files exist in `/model` directory
-
-**Database Connection Issues**
-- Verify MongoDB is running on port 27017
-- Check connection string in application.properties
-- Ensure database user has proper permissions
-
-**Frontend Build Errors**
-- Run `npm install` to update dependencies
-- Check TypeScript configuration
-- Verify Material-UI installation
-
-**Docker Issues**
-- Clear Docker cache: `docker system prune -f`
-- Rebuild images: `docker-compose build --no-cache`
-- Check port conflicts
-
-## 📞 Support
-
-For support and questions:
-- Create an issue in the repository
-- Check existing documentation and FAQs
-- Review system logs for error details
+MIT License.
 
 ---
 
-**Built with ❤️ for improving healthcare accessibility through AI**
+**CureAI** — improving healthcare accessibility through AI-driven diagnosis and smart hospital recommendations.

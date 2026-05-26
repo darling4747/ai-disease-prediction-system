@@ -5,6 +5,7 @@ This is a mock implementation for demonstration purposes
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
+import os
 import random
 
 app = Flask(__name__)
@@ -232,4 +233,5 @@ if __name__ == '__main__':
     print("\nService running on http://localhost:5000")
     print("="*60)
     
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    debug_mode = os.getenv('ML_SERVICE_DEBUG', 'false').lower() == 'true'
+    app.run(host='0.0.0.0', port=5000, debug=debug_mode, use_reloader=debug_mode)

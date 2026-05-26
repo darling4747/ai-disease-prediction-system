@@ -72,4 +72,60 @@ public class MLIntegrationController {
             return ResponseEntity.status(503).body(errorResponse);
         }
     }
+
+    @GetMapping("/diseases")
+    public ResponseEntity<Map<String, Object>> getDiseases() {
+        try {
+            String url = getMLServiceUrl() + "/diseases";
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", "Failed to fetch diseases: " + e.getMessage());
+            return ResponseEntity.status(503).body(errorResponse);
+        }
+    }
+
+    @GetMapping("/model/info")
+    public ResponseEntity<Map<String, Object>> getModelInfo() {
+        try {
+            String url = getMLServiceUrl() + "/model/info";
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", "Failed to fetch model info: " + e.getMessage());
+            return ResponseEntity.status(503).body(errorResponse);
+        }
+    }
+
+    @GetMapping("/model/compare")
+    public ResponseEntity<Map<String, Object>> compareModels() {
+        try {
+            String url = getMLServiceUrl() + "/model/compare";
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", "Failed to compare models: " + e.getMessage());
+            return ResponseEntity.status(503).body(errorResponse);
+        }
+    }
+
+    @PostMapping("/retrain")
+    public ResponseEntity<Map<String, Object>> retrainModel() {
+        try {
+            String url = getMLServiceUrl() + "/retrain";
+            Map<String, Object> response = restTemplate.postForObject(url, Map.of(), Map.class);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", "Model retraining failed: " + e.getMessage());
+            return ResponseEntity.status(503).body(errorResponse);
+        }
+    }
 }

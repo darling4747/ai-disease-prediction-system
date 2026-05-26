@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import authService from '../services/authService';
+import authService, { normalizeRole } from '../services/authService';
 
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => authService.getCurrentUser());
   const [isLoading, setIsLoading] = useState(false);
 
   const login = useCallback(async (email, password) => {
@@ -13,14 +13,15 @@ export const AuthProvider = ({ children }) => {
       const data = await authService.login(email, password);
       const userData = {
         id: data.userId,
+        userId: data.userId,
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
-        role: data.role,
+        role: normalizeRole(data.role),
         token: data.token
       };
       setUser(userData);
-      return data;
+      return userData;
     } catch (error) {
       throw error;
     } finally {
@@ -30,7 +31,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem('user');
+    authService.logout();
   }, []);
 
   const register = useCallback(async (userData) => {
@@ -39,20 +40,27 @@ export const AuthProvider = ({ children }) => {
       const data = await authService.register(userData);
       const newUser = {
         id: data.userId,
+        userId: data.userId,
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
-        role: data.role,
+        role: normalizeRole(data.role),
         token: data.token
       };
       setUser(newUser);
-      return data;
+      return newUser;
     } catch (error) {
       throw error;
     } finally {
       setIsLoading(false);
     }
   }, []);
+
+  // Role checking helpers
+  const isAdmin = useCallback(() => user?.role === 'ADMIN', [user]);
+  const isDoctor = useCallback(() => user?.role === 'DOCTOR', [user]);
+  const isPatient = useCallback(() => user?.role === 'PATIENT', [user]);
+  const hasRole = useCallback((role) => user?.role === normalizeRole(role), [user]);
 
   return (
     <AuthContext.Provider
@@ -62,7 +70,12 @@ export const AuthProvider = ({ children }) => {
         isLoading,
         login,
         logout,
-        register
+        register,
+        isAdmin,
+        isDoctor,
+        isPatient,
+        hasRole,
+        role: user?.role
       }}
     >
       {children}

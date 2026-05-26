@@ -232,21 +232,22 @@ def main():
     # Initialize predictor
     predictor = DiseasePredictor()
     
-    # Load or create data
-    data_path = '../data/dataset.csv'
-    df = predictor.load_data(data_path)
+    # Load training data from new dataset
+    training_path = '../Training.csv'
+    testing_path = '../Testing.csv'
     
-    if df is None or df.empty:
+    df_train = predictor.load_data(training_path)
+    df_test = predictor.load_data(testing_path)
+    
+    if df_train is None or df_train.empty or df_test is None or df_test.empty:
         print("No data available for training")
         return
     
-    print(f"Training with {len(df)} samples")
-    print(f"Unique diseases: {df['disease'].nunique()}")
-    print(f"Disease distribution:")
-    print(df['disease'].value_counts())
+    print(f"Training with {len(df_train)} samples from Training.csv")
+    print(f"Testing with {len(df_test)} samples from Testing.csv")
     
-    # Train the model
-    accuracy = predictor.train(df)
+    # Train the model on training data
+    accuracy = predictor.train(df_train)
     
     # Save the model
     model_path = '../model/disease_model.pkl'

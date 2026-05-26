@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -19,6 +19,47 @@ import {
   Divider
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import doctorService from '../../services/doctorService';
+import hospitalService from '../../services/hospitalService';
+import authService, { normalizeRole } from '../../services/authService';
+
+const COMMON_DOCTOR_TYPES = [
+  'General Practitioner',
+  'General Physician',
+  'Cardiologist',
+  'Neurologist',
+  'Pediatrician',
+  'Orthopedic Surgeon',
+  'Dermatologist',
+  'Psychiatrist',
+  'Gynecologist',
+  'Ophthalmologist',
+  'ENT Specialist',
+  'Pulmonologist',
+  'Gastroenterologist'
+];
+
+const normalizeDoctor = (doctor, hospitalList) => {
+  const doctorHospital = doctor.hospital;
+  const doctorHospitalId = doctor.hospitalId || (typeof doctorHospital === 'object' ? doctorHospital?.id : '');
+  const doctorHospitalName = typeof doctorHospital === 'object' ? doctorHospital?.name : doctorHospital;
+  const hospital = hospitalList.find((item) => item.id === doctorHospitalId)
+    || hospitalList.find((item) => item.name === doctorHospitalName)
+    || {};
+
+  return {
+    ...doctor,
+    available: doctor.acceptingNewPatients ?? doctor.available ?? true,
+    consultationFee: doctor.consultationFee || '100',
+    hospitalInfo: {
+      id: doctorHospitalId || hospital.id || '',
+      name: doctorHospitalName || hospital.name || 'Hospital not assigned',
+      department: doctor.department || doctorHospital?.department || hospital.departments?.[0] || 'Outpatient',
+      address: doctorHospital?.address || hospital.address || 'Address unavailable',
+      phone: doctorHospital?.phone || hospital.phone || doctor.phone || 'Phone unavailable'
+    }
+  };
+};
 
 const DoctorRecommendations = () => {
   const [doctors, setDoctors] = useState([]);
@@ -29,141 +70,69 @@ const DoctorRecommendations = () => {
   const [selectedSpecialization, setSelectedSpecialization] = useState('');
   const [selectedHospital, setSelectedHospital] = useState('');
   const navigate = useNavigate();
+  const isPatient = normalizeRole(authService.getCurrentUser()?.role) === 'PATIENT';
 
-  const specializations = [
-    'General Practitioner',
-    'Cardiologist',
-    'Neurologist',
-    'Pediatrician',
-    'Orthopedic',
-    'Dermatologist',
-    'Psychiatrist',
-    'Gynecologist',
-    'Ophthalmologist',
-    'ENT Specialist'
-  ];
+  const specializations = useMemo(() => {
+    const doctorTypes = doctors
+      .map((doctor) => doctor.specialization)
+      .filter(Boolean);
 
-  useEffect(() => {
-    fetchDoctors();
-    fetchHospitals();
-  }, []);
+    return Array.from(new Set([...COMMON_DOCTOR_TYPES, ...doctorTypes]))
+      .sort((first, second) => first.localeCompare(second));
+  }, [doctors]);
 
-  const fetchDoctors = async () => {
+  const loadRecommendations = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const response = await fetch('http://localhost:8080/api/doctors');
-      if (!response.ok) {
-        throw new Error('Failed to fetch doctors');
-      }
-      const data = await response.json();
-      setDoctors(data);
+      const [doctorData, hospitalData] = await Promise.all([
+        doctorService.getDoctors(),
+        hospitalService.getHospitals()
+      ]);
+      setHospitals(hospitalData);
+      setDoctors(
+        doctorData
+          .map((doctor) => normalizeDoctor(doctor, hospitalData))
+          .sort((first, second) => (
+            (first.specialization || '').localeCompare(second.specialization || '')
+            || (first.name || '').localeCompare(second.name || '')
+          ))
+      );
     } catch (err) {
       console.error('Error fetching doctors:', err);
       setError('Failed to load doctors');
-      
-      setDoctors([
-        {
-          id: '1',
-          name: 'Dr. John Smith',
-          specialization: 'General Practitioner',
-          hospital: {
-            id: '1',
-            name: 'City General Hospital',
-            department: 'Outpatient',
-            address: '123 Main St, City',
-            phone: '+1-555-0123'
-          },
-          experience: 15,
-          rating: 4.5,
-          available: true,
-          consultationFee: 100
-        },
-        {
-          id: '2',
-          name: 'Dr. Sarah Johnson',
-          specialization: 'Cardiologist',
-          hospital: {
-            id: '2',
-            name: 'Heart Care Center',
-            department: 'Cardiology',
-            address: '456 Medical Ave, City',
-            phone: '+1-555-0124'
-          },
-          experience: 12,
-          rating: 4.8,
-          available: true,
-          consultationFee: 200
-        }
-      ]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchHospitals = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/api/hospitals');
-      if (!response.ok) {
-        throw new Error('Failed to fetch hospitals');
-      }
-      const data = await response.json();
-      setHospitals(data);
-    } catch (err) {
-      console.error('Error fetching hospitals:', err);
-      
-      setHospitals([
-        {
-          id: '1',
-          name: 'City General Hospital',
-          address: '123 Main St, City',
-          phone: '+1-555-0123',
-          departments: ['General Medicine', 'Cardiology', 'Neurology', 'Pediatrics']
-        },
-        {
-          id: '2',
-          name: 'Heart Care Center',
-          address: '456 Medical Ave, City',
-          phone: '+1-555-0124',
-          departments: ['Cardiology', 'Cardiac Surgery']
-        }
-      ]);
-    }
-  };
+  useEffect(() => {
+    loadRecommendations();
+  }, [loadRecommendations]);
 
   const filteredDoctors = doctors.filter(doctor => {
-    const matchesSearch = doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase());
+    const doctorName = doctor.name || '';
+    const specialization = doctor.specialization || '';
+    const matchesSearch = doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         specialization.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSpecialization = !selectedSpecialization || 
-                                 doctor.specialization === selectedSpecialization;
-    const matchesHospital = !selectedHospital || 
-                           doctor.hospital.id === selectedHospital;
+                                 specialization.toLowerCase().includes(selectedSpecialization.toLowerCase()) ||
+                                 selectedSpecialization.toLowerCase().includes(specialization.toLowerCase());
+    const matchesHospital = !selectedHospital ||
+                           doctor.hospitalInfo.id === selectedHospital ||
+                           doctor.hospitalInfo.name === selectedHospital;
     
     return matchesSearch && matchesSpecialization && matchesHospital;
   });
 
-  const handleBookAppointment = async (doctorId) => {
-    try {
-      const response = await fetch('http://localhost:8080/api/appointments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          doctorId: doctorId,
-          userId: 'user123',
-          date: new Date().toISOString(),
-          status: 'scheduled'
-        }),
-      });
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedSpecialization('');
+    setSelectedHospital('');
+  };
 
-      if (response.ok) {
-        alert('Appointment booked successfully!');
-      } else {
-        throw new Error('Failed to book appointment');
-      }
-    } catch (err) {
-      console.error('Error booking appointment:', err);
-      alert('Failed to book appointment. Please try again.');
-    }
+  const handleBookAppointment = () => {
+    navigate('/appointments');
   };
 
   if (loading) {
@@ -180,19 +149,26 @@ const DoctorRecommendations = () => {
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Doctor Recommendations
+          All Doctor Recommendations
         </Typography>
         <Typography variant="body1" color="text.secondary" paragraph>
-          Find the right doctor based on your symptoms and preferences.
+          Browse every available doctor type and filter by specialization, hospital, or name.
         </Typography>
 
-        <Button
-          variant="contained"
-          onClick={() => navigate('/')}
-          sx={{ mb: 3 }}
-        >
-          Back to Symptom Checker
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/')}
+          >
+            Back to Symptom Checker
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={clearFilters}
+          >
+            Clear Filters
+          </Button>
+        </Box>
 
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
@@ -283,31 +259,33 @@ const DoctorRecommendations = () => {
                     Hospital Information
                   </Typography>
                   <Typography variant="body2" gutterBottom>
-                    <strong>{doctor.hospital.name}</strong>
+                    <strong>{doctor.hospitalInfo.name}</strong>
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Department: {doctor.hospital.department}
+                    Department: {doctor.hospitalInfo.department}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Address: {doctor.hospital.address}
+                    Address: {doctor.hospitalInfo.address}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Phone: {doctor.hospital.phone}
+                    Phone: {doctor.hospitalInfo.phone}
                   </Typography>
 
                   <Divider sx={{ my: 2 }} />
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="h6" color="primary">
-                      ${doctor.consultationFee}
+                      {String(doctor.consultationFee).startsWith('$') ? doctor.consultationFee : `$${doctor.consultationFee}`}
                     </Typography>
-                    <Button
-                      variant="contained"
-                      disabled={!doctor.available}
-                      onClick={() => handleBookAppointment(doctor.id)}
-                    >
-                      {doctor.available ? 'Book Appointment' : 'Not Available'}
-                    </Button>
+                    {isPatient && (
+                      <Button
+                        variant="contained"
+                        disabled={!doctor.available}
+                        onClick={handleBookAppointment}
+                      >
+                        {doctor.available ? 'Book Appointment' : 'Not Available'}
+                      </Button>
+                    )}
                   </Box>
                 </CardContent>
               </Card>

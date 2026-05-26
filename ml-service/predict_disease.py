@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 import pickle
 import json
+import os
 from typing import List, Dict, Tuple
 
 class DiseasePredictor:
@@ -15,10 +16,23 @@ class DiseasePredictor:
         self.label_encoder_symptom = None
         self.symptom_columns = []
         
+    def _resolve_path(self, path: str) -> str:
+        """Resolve relative path to be absolute relative to the script's directory"""
+        if os.path.isabs(path):
+            return path
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        resolved = os.path.join(base_dir, path)
+        # Ensure parent directory exists
+        parent_dir = os.path.dirname(resolved)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+        return resolved
+        
     def load_data(self, csv_path: str) -> pd.DataFrame:
         """Load disease-symptom dataset from CSV"""
+        resolved_path = self._resolve_path(csv_path)
         try:
-            df = pd.read_csv(csv_path)
+            df = pd.read_csv(resolved_path)
             return df
         except FileNotFoundError:
             # Create sample data if file doesn't exist
@@ -45,8 +59,16 @@ class DiseasePredictor:
     def preprocess_data(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series]:
         """Preprocess the data for training"""
         # Separate features and target
-        X = df.drop('disease', axis=1)
-        y = df['disease']
+        # Handle both 'disease' and 'prognosis' column names
+        target_col = 'prognosis' if 'prognosis' in df.columns else 'disease'
+        
+        # Drop any Unnamed columns
+        unnamed_cols = [col for col in df.columns if 'Unnamed' in col]
+        if unnamed_cols:
+            df = df.drop(columns=unnamed_cols)
+            
+        X = df.drop(target_col, axis=1)
+        y = df[target_col]
         
         # Store symptom column names
         self.symptom_columns = X.columns.tolist()
@@ -60,9 +82,14 @@ class DiseasePredictor:
     def train_model(self, X: pd.DataFrame, y: pd.Series) -> None:
         """Train the Random Forest model"""
         # Split data
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42
-        )
+        try:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=0.2, random_state=42, stratify=y
+            )
+        except ValueError:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=0.2, random_state=42
+            )
         
         # Train Random Forest
         self.model = RandomForestClassifier(
@@ -99,7 +126,7 @@ class DiseasePredictor:
         # Prepare results
         results = []
         for i, idx in enumerate(predicted_indices[:5]):  # Top 5 predictions
-            if predictions[idx] > 0.1:  # Only include predictions with >10% probability
+            if i == 0 or predictions[idx] > 0.02:  # Always include top prediction, others if >2%
                 disease_name = self.label_encoder_disease.inverse_transform([idx])[0]
                 probability = float(predictions[idx])
                 
@@ -227,17 +254,19 @@ class DiseasePredictor:
     
     def save_model(self, model_path: str) -> None:
         """Save the trained model"""
+        resolved_path = self._resolve_path(model_path)
         model_data = {
             'model': self.model,
             'label_encoder_disease': self.label_encoder_disease,
             'symptom_columns': self.symptom_columns
         }
-        with open(model_path, 'wb') as f:
+        with open(resolved_path, 'wb') as f:
             pickle.dump(model_data, f)
     
     def load_model(self, model_path: str) -> None:
         """Load a trained model"""
-        with open(model_path, 'rb') as f:
+        resolved_path = self._resolve_path(model_path)
+        with open(resolved_path, 'rb') as f:
             model_data = pickle.load(f)
             self.model = model_data['model']
             self.label_encoder_disease = model_data['label_encoder_disease']

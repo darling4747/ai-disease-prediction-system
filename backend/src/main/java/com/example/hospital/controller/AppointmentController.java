@@ -83,6 +83,11 @@ public class AppointmentController {
             response.put("message", "Unauthorized");
             return ResponseEntity.status(401).body(response);
         }
+        if (!"PATIENT".equalsIgnoreCase(currentUser.getRole())) {
+            response.put("success", false);
+            response.put("message", "Only patients can book appointments");
+            return ResponseEntity.status(403).body(response);
+        }
 
         try {
             String doctorId = (String) request.get("doctorId");
@@ -268,14 +273,22 @@ public class AppointmentController {
         Map<String, Object> response = new HashMap<>();
         User currentUser = getCurrentUser(token);
 
-        if (currentUser == null || !"ADMIN".equals(currentUser.getRole())) {
+        if (currentUser == null || (!"ADMIN".equals(currentUser.getRole()) && !"DOCTOR".equals(currentUser.getRole()))) {
             response.put("success", false);
             response.put("message", "Unauthorized");
             return ResponseEntity.status(403).body(response);
         }
 
         try {
-            List<Appointment> appointments = appointmentRepository.findAll();
+            List<Appointment> appointments;
+            if ("ADMIN".equals(currentUser.getRole())) {
+                appointments = appointmentRepository.findAll();
+            } else {
+                Optional<Doctor> doctor = doctorRepository.findByEmail(currentUser.getEmail());
+                appointments = doctor
+                        .map(value -> appointmentRepository.findByDoctorIdOrderByAppointmentDateDesc(value.getId()))
+                        .orElse(List.of());
+            }
             response.put("success", true);
             response.put("appointments", appointments);
             return ResponseEntity.ok(response);

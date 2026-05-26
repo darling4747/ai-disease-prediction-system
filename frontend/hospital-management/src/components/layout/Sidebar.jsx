@@ -1,74 +1,106 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
+  Avatar,
+  Box,
   Drawer,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
-  Toolbar,
-  Typography,
-  Box,
-  Avatar
+  Typography
 } from '@mui/material';
 import {
-  LocalHospital,
-  History,
-  People,
-  Business,
-  Dashboard,
   AdminPanelSettings,
+  Business,
   CalendarToday,
-  Favorite
+  Dashboard,
+  Description,
+  Favorite,
+  HealthAndSafety,
+  History,
+  LocalHospital,
+  LocalPharmacy,
+  MedicalServices,
+  People
 } from '@mui/icons-material';
-import authService from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 
 const drawerWidth = 260;
+const accent = '#eff16f';
+const muted = '#a5a6b4';
 
 const Sidebar = () => {
   const location = useLocation();
-  const currentUser = authService.getCurrentUser();
+  const { user: currentUser } = useAuth();
   const isAdmin = currentUser?.role === 'ADMIN';
+  const isDoctor = currentUser?.role === 'DOCTOR';
+  const isPatient = currentUser?.role === 'PATIENT';
 
   const isActive = (path) => location.pathname === path;
 
   const mainMenuItems = [
     {
       text: 'Dashboard',
-      icon: <Dashboard sx={{ fontSize: 20 }} />, 
+      icon: <Dashboard sx={{ fontSize: 21 }} />,
       path: '/dashboard'
     },
     {
-      text: 'Disease Prediction',
-      icon: <Favorite sx={{ fontSize: 20 }} />,
+      text: 'AI Diagnosis',
+      icon: <Favorite sx={{ fontSize: 21 }} />,
       path: '/'
     },
     {
-      text: 'Prediction History',
-      icon: <History sx={{ fontSize: 20 }} />,
+      text: isDoctor ? 'Patient Cases' : 'Prediction History',
+      icon: <History sx={{ fontSize: 21 }} />,
       path: '/history'
-    },
-    {
-      text: 'Appointments',
-      icon: <CalendarToday sx={{ fontSize: 20 }} />,
-      path: '/appointments'
     }
   ];
+
+  if (isPatient) {
+    mainMenuItems.push({
+      text: 'Appointments',
+      icon: <CalendarToday sx={{ fontSize: 21 }} />,
+      path: '/appointments'
+    });
+  }
+
+  if (isDoctor || isAdmin) {
+    mainMenuItems.push({
+      text: 'Doctor Dashboard',
+      icon: <MedicalServices sx={{ fontSize: 21 }} />,
+      path: '/doctor-dashboard'
+    });
+  }
+
+  mainMenuItems.push(
+    {
+      text: 'Health Report',
+      icon: <Description sx={{ fontSize: 21 }} />,
+      path: '/health-report'
+    },
+    {
+      text: 'Medicines',
+      icon: <LocalPharmacy sx={{ fontSize: 21 }} />,
+      path: '/medicines'
+    }
+  );
 
   const otherMenuItems = [
     {
       text: 'Doctors',
-      icon: <People sx={{ fontSize: 20 }} />,
+      icon: <People sx={{ fontSize: 21 }} />,
       path: '/doctors'
     },
     {
       text: 'Hospitals',
-      icon: <Business sx={{ fontSize: 20 }} />,
+      icon: <Business sx={{ fontSize: 21 }} />,
       path: '/hospitals'
     },
     {
       text: 'Recommendations',
-      icon: <LocalHospital sx={{ fontSize: 20 }} />,
+      icon: <LocalHospital sx={{ fontSize: 21 }} />,
       path: '/recommendations'
     }
   ];
@@ -76,71 +108,76 @@ const Sidebar = () => {
   if (isAdmin) {
     otherMenuItems.push({
       text: 'Admin Panel',
-      icon: <AdminPanelSettings sx={{ fontSize: 20 }} />,
+      icon: <AdminPanelSettings sx={{ fontSize: 21 }} />,
       path: '/admin'
     });
   }
 
   const MenuSection = ({ title, items }) => (
     <Box sx={{ mb: 3 }}>
-      <Typography 
-        variant="caption" 
-        sx={{ 
-          px: 3, 
-          mb: 1, 
+      <Typography
+        sx={{
+          px: 3,
+          mb: 1,
           display: 'block',
-          color: '#94a3b8',
-          fontWeight: 500,
-          fontSize: '0.75rem',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em'
+          color: '#777986',
+          fontWeight: 800,
+          fontSize: '0.72rem',
+          textTransform: 'uppercase'
         }}
       >
         {title}
       </Typography>
-      <List sx={{ px: 2 }}>
-        {items.map((item) => (
-          <ListItem
-            key={item.text}
-            component={Link}
-            to={item.path}
-            selected={isActive(item.path)}
-            sx={{
-              borderRadius: 2,
-              mb: 0.5,
-              py: 1,
-              textDecoration: 'none',
-              '&.Mui-selected': {
-                backgroundColor: '#6366f1',
-                color: 'white',
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
-                '& .MuiListItemIcon-root': {
-                  color: 'white'
-                }
-              },
-              '&:hover': {
-                backgroundColor: isActive(item.path) ? '#6366f1' : '#f1f5f9',
-              },
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <ListItemIcon sx={{ 
-              color: isActive(item.path) ? 'white' : '#64748b',
-              minWidth: 36,
-              mr: 1
-            }}>
-              {item.icon}
-            </ListItemIcon>
-            <ListItemText 
-              primary={item.text} 
-              primaryTypographyProps={{
-                fontSize: '0.875rem',
-                fontWeight: isActive(item.path) ? 600 : 500,
-                color: isActive(item.path) ? 'white' : '#475569'
-              }}
-            />
-          </ListItem>
-        ))}
+      <List sx={{ px: 1.5 }}>
+        {items.map((item) => {
+          const active = isActive(item.path);
+
+          return (
+            <ListItem key={item.text} disablePadding sx={{ mb: 0.7 }}>
+              <ListItemButton
+                component={Link}
+                to={item.path}
+                selected={active}
+                sx={{
+                  minHeight: 48,
+                  borderRadius: '8px',
+                  color: active ? accent : muted,
+                  border: active ? '1px solid rgba(239,241,111,0.25)' : '1px solid transparent',
+                  bgcolor: active ? 'rgba(239,241,111,0.13)' : 'transparent',
+                  '&.Mui-selected': {
+                    bgcolor: 'rgba(239,241,111,0.13)'
+                  },
+                  '&.Mui-selected:hover, &:hover': {
+                    bgcolor: active ? 'rgba(239,241,111,0.16)' : 'rgba(255,255,255,0.055)'
+                  },
+                  '&::before': active
+                    ? {
+                      content: '""',
+                      position: 'absolute',
+                      left: -2,
+                      top: 8,
+                      bottom: 8,
+                      width: 4,
+                      borderRadius: 999,
+                      bgcolor: accent
+                    }
+                    : {}
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 38, color: active ? accent : muted }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  primaryTypographyProps={{
+                    fontSize: '0.92rem',
+                    fontWeight: active ? 800 : 600
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
       </List>
     </Box>
   );
@@ -149,109 +186,91 @@ const Sidebar = () => {
     <Drawer
       variant="permanent"
       sx={{
+        display: { xs: 'none', md: 'block' },
         width: drawerWidth,
         flexShrink: 0,
         '& .MuiDrawer-paper': {
           width: drawerWidth,
           boxSizing: 'border-box',
-          borderRight: '1px solid #e2e8f0',
-          backgroundColor: '#ffffff',
-          boxShadow: '4px 0 24px rgba(0, 0, 0, 0.02)'
-        },
+          borderRight: '1px solid rgba(239,241,111,0.12)',
+          bgcolor: '#101115',
+          color: '#f7f3d0',
+          backgroundImage:
+            'linear-gradient(180deg, rgba(239,241,111,0.05), transparent 42%), linear-gradient(90deg, rgba(255,255,255,0.035), transparent)',
+          boxShadow: '12px 0 40px rgba(0,0,0,0.35)'
+        }
       }}
     >
-      {/* Logo Section */}
-      <Toolbar sx={{ px: 3, py: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box 
-            sx={{ 
-              p: 1, 
-              borderRadius: 2, 
-              bgcolor: '#6366f1',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+      <Box sx={{ px: 2.5, pt: 3, pb: 2.5, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.4 }}>
+          <Box
+            sx={{
+              width: 42,
+              height: 42,
+              borderRadius: '8px',
+              display: 'grid',
+              placeItems: 'center',
+              color: '#121312',
+              bgcolor: accent,
+              boxShadow: '0 0 24px rgba(239,241,111,0.28)'
             }}
           >
-            <Favorite sx={{ fontSize: 20 }} />
+            <HealthAndSafety sx={{ fontSize: 27 }} />
           </Box>
           <Box>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 700, 
-                color: '#1e293b',
-                fontSize: '1.125rem',
-                letterSpacing: '-0.02em'
-              }}
-            >
-              HavenMed
+            <Typography sx={{ fontWeight: 900, fontSize: '1.35rem', lineHeight: 1 }}>
+              CureAI
             </Typography>
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                color: '#94a3b8',
-                fontWeight: 500
-              }}
-            >
-              Healthcare System
+            <Typography sx={{ color: muted, fontSize: '0.76rem', fontWeight: 700 }}>
+              Diagnosis System
             </Typography>
           </Box>
         </Box>
-      </Toolbar>
-
-      {/* Menu Sections */}
-      <Box sx={{ overflow: 'auto', mt: 2 }}>
-        <MenuSection title="Main Menu" items={mainMenuItems} />
-        <MenuSection title="Other" items={otherMenuItems} />
       </Box>
 
-      {/* User Profile Section */}
-      <Box sx={{ mt: 'auto', p: 2, borderTop: '1px solid #e2e8f0' }}>
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 2,
-            p: 2,
-            borderRadius: 2,
-            bgcolor: '#f8fafc',
-            cursor: 'pointer',
-            '&:hover': { bgcolor: '#f1f5f9' }
+      <Box sx={{ overflowY: 'auto', mt: 3 }}>
+        <MenuSection title="Clinical" items={mainMenuItems} />
+        <MenuSection title="Network" items={otherMenuItems} />
+      </Box>
+
+      <Box sx={{ mt: 'auto', p: 2.2, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.3,
+            p: 1.4,
+            borderRadius: '8px',
+            bgcolor: 'rgba(255,255,255,0.045)',
+            border: '1px solid rgba(255,255,255,0.08)'
           }}
         >
-          <Avatar 
-            sx={{ 
-              bgcolor: '#6366f1', 
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              width: 40,
-              height: 40
+          <Avatar
+            sx={{
+              bgcolor: accent,
+              color: '#141513',
+              fontSize: '0.9rem',
+              fontWeight: 900,
+              width: 42,
+              height: 42
             }}
           >
-            {currentUser?.firstName?.[0] || 'U'}
+            {(currentUser?.firstName?.[0] || 'U').toUpperCase()}
           </Avatar>
-          <Box sx={{ flex: 1 }}>
-            <Typography 
-              variant="subtitle2" 
-              sx={{ 
-                fontWeight: 600, 
-                color: '#1e293b',
-                fontSize: '0.875rem'
-              }}
-            >
+          <Box sx={{ minWidth: 0 }}>
+            <Typography noWrap sx={{ fontWeight: 800, fontSize: '0.9rem' }}>
               {currentUser?.firstName || 'User'} {currentUser?.lastName || ''}
             </Typography>
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                color: '#94a3b8',
-                fontWeight: 500,
+            <Typography
+              noWrap
+              sx={{
+                color: muted,
+                fontSize: '0.75rem',
+                fontWeight: 700,
                 textTransform: 'capitalize'
               }}
             >
-              {currentUser?.role?.toLowerCase() || 'Patient'}
+              {currentUser?.role?.toLowerCase() || 'patient'}
             </Typography>
           </Box>
         </Box>

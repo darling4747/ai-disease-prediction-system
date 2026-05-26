@@ -1,6 +1,9 @@
 package com.example.hospital.service;
 
 import com.example.hospital.model.Prediction;
+import com.example.hospital.model.Doctor;
+import com.example.hospital.model.User;
+import com.example.hospital.repository.DoctorRepository;
 import com.example.hospital.repository.PredictionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,9 @@ public class PredictionService {
     @Autowired
     private PredictionRepository predictionRepository;
 
+    @Autowired
+    private DoctorRepository doctorRepository;
+
     public List<Prediction> getAllPredictions() {
         return predictionRepository.findAll();
     }
@@ -27,6 +33,14 @@ public class PredictionService {
 
     public List<Prediction> getPredictionsByUser(String userId) {
         return predictionRepository.findByUserIdOrderByTimestampDesc(userId);
+    }
+
+    public List<Prediction> getPredictionsVisibleToDoctor(User doctorUser) {
+        return filterPredictionsForDoctor(predictionRepository.findAll(), doctorUser);
+    }
+
+    public List<Prediction> getPredictionsByUserVisibleToDoctor(String userId, User doctorUser) {
+        return filterPredictionsForDoctor(getPredictionsByUser(userId), doctorUser);
     }
 
     public Prediction savePrediction(Map<String, Object> predictionData) {
@@ -53,6 +67,23 @@ public class PredictionService {
             return predictionRepository.save(prediction);
         }
         return null;
+    }
+
+    public Prediction addMedicalAdvice(String id, String advice, User doctorUser) {
+        Optional<Prediction> existingPrediction = predictionRepository.findById(id);
+        if (existingPrediction.isEmpty()) {
+            return null;
+        }
+
+        Prediction prediction = existingPrediction.get();
+        Map<String, Object> metadata = new java.util.HashMap<>(
+                prediction.getMetadata() == null ? Map.of() : prediction.getMetadata()
+        );
+        metadata.put("medicalAdvice", advice);
+        metadata.put("advisedBy", doctorUser.getEmail());
+        metadata.put("advisedAt", LocalDateTime.now().toString());
+        prediction.setMetadata(metadata);
+        return predictionRepository.save(prediction);
     }
 
     public boolean deletePrediction(String id) {
@@ -85,18 +116,50 @@ public class PredictionService {
 
     public Map<String, Long> getDiseaseFrequency(String userId) {
         List<Prediction> predictions = getPredictionsByUser(userId);
+        return buildDiseaseFrequency(predictions);
+    }
+
+    public Map<String, Long> getSystemDiseaseFrequency(List<Prediction> predictions) {
+        return buildDiseaseFrequency(predictions);
+    }
+
+    public Map<String, Object> getSystemAnalytics(List<Prediction> predictions) {
+        Map<String, Long> diseaseFrequency = buildDiseaseFrequency(predictions);
+        long criticalCount = predictions.stream()
+                .filter(prediction -> prediction.getPredictions() != null)
+                .filter(prediction -> prediction.getPredictions().stream().anyMatch(item -> {
+                    String severity = String.valueOf(item.getOrDefault("severity", "")).toLowerCase();
+                    String name = String.valueOf(item.getOrDefault("name", "")).toLowerCase();
+                    return "high".equals(severity) || "critical".equals(severity)
+                            || name.contains("heart attack") || name.contains("covid");
+                }))
+                .count();
+
+        return Map.of(
+                "totalPredictions", (long) predictions.size(),
+                "diseaseFrequency", diseaseFrequency,
+                "criticalCases", criticalCount,
+                "completedCases", predictions.stream()
+                        .filter(prediction -> "completed".equalsIgnoreCase(prediction.getStatus()))
+                        .count()
+        );
+    }
+
+    private Map<String, Long> buildDiseaseFrequency(List<Prediction> predictions) {
         Map<String, Long> diseaseFrequency = new java.util.HashMap<>();
-        
+
         for (Prediction prediction : predictions) {
             if (prediction.getPredictions() != null) {
                 for (Map<String, Object> pred : prediction.getPredictions()) {
                     String diseaseName = (String) pred.get("name");
-                    diseaseFrequency.put(diseaseName, 
-                        diseaseFrequency.getOrDefault(diseaseName, 0L) + 1);
+                    if (diseaseName != null && !diseaseName.isBlank()) {
+                        diseaseFrequency.put(diseaseName,
+                                diseaseFrequency.getOrDefault(diseaseName, 0L) + 1);
+                    }
                 }
             }
         }
-        
+
         return diseaseFrequency;
     }
 
@@ -105,5 +168,42 @@ public class PredictionService {
         return predictions.stream()
                 .limit(limit)
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    private List<Prediction> filterPredictionsForDoctor(List<Prediction> predictions, User doctorUser) {
+        if (doctorUser == null) {
+            return List.of();
+        }
+
+        Optional<Doctor> doctor = doctorRepository.findByEmail(doctorUser.getEmail());
+        if (doctor.isEmpty()) {
+            return List.of();
+        }
+
+        String specialization = normalize(doctor.get().getSpecialization());
+        String department = normalize(doctor.get().getDepartment());
+
+        return predictions.stream()
+                .filter(prediction -> prediction.getPredictions() != null)
+                .filter(prediction -> prediction.getPredictions().stream().anyMatch(item ->
+                        matchesDoctorScope(item, specialization, department)))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    private boolean matchesDoctorScope(Map<String, Object> prediction, String specialization, String department) {
+        String recommendedDoctor = normalize((String) prediction.get("doctorSpecialization"));
+        String hospitalDepartment = normalize((String) prediction.get("hospitalDepartment"));
+        return containsEither(recommendedDoctor, specialization, department)
+                || containsEither(hospitalDepartment, specialization, department);
+    }
+
+    private boolean containsEither(String value, String firstScope, String secondScope) {
+        return !value.isBlank()
+                && ((!firstScope.isBlank() && (value.contains(firstScope) || firstScope.contains(value)))
+                || (!secondScope.isBlank() && (value.contains(secondScope) || secondScope.contains(value))));
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
     }
 }

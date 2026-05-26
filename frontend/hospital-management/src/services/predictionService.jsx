@@ -1,79 +1,58 @@
-import { api, mlApi } from './api';
+import { api } from './api';
 
 const predictionService = {
-  // Get all available symptoms from ML service
   getSymptoms: async () => {
     try {
-      const response = await mlApi.get('/symptoms');
+      const response = await api.get('/api/ml/symptoms');
       return response.data.symptoms || [];
     } catch (error) {
       console.error('Error fetching symptoms:', error);
-      // Return default symptoms as fallback
       return [
-        'Fever', 'Cough', 'Headache', 'Fatigue', 'Nausea', 
-        'Chest Pain', 'Shortness of Breath', 'Dizziness', 
-        'Body Aches', 'Sore Throat', 'Runny Nose', 'Chills'
+        'Fever', 'Cough', 'Headache', 'Fatigue', 'Nausea',
+        'Chest Pain', 'Shortness of Breath', 'Dizziness',
+        'Body Aches', 'Sore Throat', 'Runny Nose', 'Chills',
       ];
     }
   },
 
-  // Predict disease based on symptoms
   predictDisease: async (symptoms) => {
-    try {
-      const response = await mlApi.post('/predict', { symptoms });
-      return response.data;
-    } catch (error) {
-      console.error('Prediction error:', error);
-      throw error;
-    }
+    const response = await api.post('/api/ml/predict', { symptoms });
+    return response.data;
   },
 
-  // Get all diseases
   getDiseases: async () => {
     try {
-      const response = await mlApi.get('/diseases');
+      const response = await api.get('/api/ml/diseases');
       return response.data.diseases || [];
     } catch (error) {
-      console.error('Error fetching diseases:', error);
       return [];
     }
   },
 
-  // Get ML service health
   getMLHealth: async () => {
     try {
-      const response = await mlApi.get('/health');
+      const response = await api.get('/api/ml/health');
       return response.data;
     } catch (error) {
-      console.error('ML service health check failed:', error);
       return { status: 'unavailable' };
     }
   },
 
-  // Get backend health
   getBackendHealth: async () => {
     try {
       const response = await api.get('/actuator/health');
       return response.data;
     } catch (error) {
-      console.error('Backend health check failed:', error);
       return { status: 'DOWN' };
     }
   },
 
-  // Save prediction to backend
   savePrediction: async (predictionData) => {
-    try {
-      const response = await api.post('/api/predictions', predictionData);
-      return response.data;
-    } catch (error) {
-      console.error('Error saving prediction:', error);
-      throw error;
-    }
+    const response = await api.post('/api/predictions', predictionData);
+    return response.data;
   },
 
-  // Get prediction history from backend
-  getPredictionHistory: async (userId = 'user123') => {
+  getPredictionHistory: async (userId) => {
     try {
       const response = await api.get(`/api/predictions/user/${userId}`);
       return response.data || [];
@@ -81,7 +60,45 @@ const predictionService = {
       console.error('Error fetching prediction history:', error);
       return [];
     }
-  }
+  },
+
+  getAllPredictions: async () => {
+    try {
+      const response = await api.get('/api/predictions');
+      return response.data || [];
+    } catch (error) {
+      console.error('Error fetching prediction cases:', error);
+      return [];
+    }
+  },
+
+  getPredictionById: async (id) => {
+    const response = await api.get(`/api/predictions/${id}`);
+    return response.data;
+  },
+
+  addMedicalAdvice: async (id, advice) => {
+    const response = await api.put(`/api/predictions/${id}/advice`, { advice });
+    return response.data;
+  },
+
+  getUserAnalytics: async (userId) => {
+    try {
+      const response = await api.get(`/api/predictions/user/${userId}/analytics`);
+      return response.data || {};
+    } catch (error) {
+      return {};
+    }
+  },
+
+  getSystemAnalytics: async () => {
+    try {
+      const response = await api.get('/api/predictions/analytics');
+      return response.data || {};
+    } catch (error) {
+      return null;
+    }
+  },
 };
 
 export default predictionService;

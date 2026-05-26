@@ -11,7 +11,6 @@ import {
   Tabs,
   Tab,
   Alert,
-  Chip,
   Divider,
   IconButton,
   Dialog,
@@ -35,8 +34,10 @@ import {
 import adminService from '../../services/adminService';
 import doctorService from '../../services/doctorService';
 import hospitalService from '../../services/hospitalService';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminPanel = () => {
+  const { isAdmin, user } = useAuth();
   const [activeTab, setActiveTab] = useState(0);
   const [stats, setStats] = useState({ doctors: 0, hospitals: 0, users: 0 });
   const [doctors, setDoctors] = useState([]);
@@ -60,8 +61,24 @@ const AdminPanel = () => {
   });
 
   useEffect(() => {
+    if (!isAdmin()) {
+      setMessage({ type: 'error', text: 'Access Denied: Admin privileges required' });
+      return;
+    }
     loadData();
-  }, []);
+  }, [isAdmin]);
+
+  if (!isAdmin()) {
+    return (
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <Alert severity="error" variant="filled">
+          <Typography variant="h6">Access Denied</Typography>
+          <Typography>You do not have permission to access the Admin Panel.</Typography>
+          <Typography sx={{ mt: 1 }}>Logged in as: <strong>{user?.role || 'Unknown'}</strong></Typography>
+        </Alert>
+      </Container>
+    );
+  }
 
   const loadData = async () => {
     try {
@@ -581,9 +598,14 @@ const AdminPanel = () => {
           <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
           <Button
             variant="contained"
-            onClick={dialogType === 'doctor' ? handleAddDoctor : handleAddHospital}
+            onClick={() => {
+              if (dialogType === 'doctor') handleAddDoctor();
+              else if (dialogType === 'hospital') handleAddHospital();
+              else if (dialogType === 'editDoctor') handleUpdateDoctor();
+              else if (dialogType === 'editHospital') handleUpdateHospital();
+            }}
           >
-            Add {dialogType === 'doctor' ? 'Doctor' : 'Hospital'}
+            {dialogType.startsWith('edit') ? 'Update' : 'Add'} {dialogType === 'doctor' || dialogType === 'editDoctor' ? 'Doctor' : 'Hospital'}
           </Button>
         </DialogActions>
       </Dialog>

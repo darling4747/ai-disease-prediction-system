@@ -9,6 +9,7 @@ import com.example.hospital.repository.UserRepository;
 import com.example.hospital.service.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/admin")
 @CrossOrigin(origins = "*")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     @Autowired
@@ -33,32 +35,14 @@ public class AdminController {
     @Autowired
     private JwtService jwtService;
 
-    // Check if user is admin
-    private boolean isAdmin(String token) {
-        try {
-            String email = jwtService.extractEmail(token.replace("Bearer ", ""));
-            Optional<User> user = userRepository.findByEmail(email);
-            return user.isPresent() && "ADMIN".equals(user.get().getRole());
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     // ==================== DOCTOR ENDPOINTS ====================
 
     @PostMapping("/doctors")
     public ResponseEntity<Map<String, Object>> addDoctor(
-            @RequestBody Doctor doctor,
-            @RequestHeader("Authorization") String token) {
+            @RequestBody Doctor doctor) {
         
         Map<String, Object> response = new HashMap<>();
         
-        if (!isAdmin(token)) {
-            response.put("success", false);
-            response.put("message", "Unauthorized: Admin access required");
-            return ResponseEntity.status(403).body(response);
-        }
-
         try {
             Doctor savedDoctor = doctorRepository.save(doctor);
             response.put("success", true);
@@ -75,17 +59,10 @@ public class AdminController {
     @PutMapping("/doctors/{id}")
     public ResponseEntity<Map<String, Object>> updateDoctor(
             @PathVariable String id,
-            @RequestBody Doctor doctor,
-            @RequestHeader("Authorization") String token) {
+            @RequestBody Doctor doctor) {
         
         Map<String, Object> response = new HashMap<>();
         
-        if (!isAdmin(token)) {
-            response.put("success", false);
-            response.put("message", "Unauthorized: Admin access required");
-            return ResponseEntity.status(403).body(response);
-        }
-
         try {
             Optional<Doctor> existingDoctor = doctorRepository.findById(id);
             if (!existingDoctor.isPresent()) {
@@ -109,17 +86,10 @@ public class AdminController {
 
     @DeleteMapping("/doctors/{id}")
     public ResponseEntity<Map<String, Object>> deleteDoctor(
-            @PathVariable String id,
-            @RequestHeader("Authorization") String token) {
+            @PathVariable String id) {
         
         Map<String, Object> response = new HashMap<>();
         
-        if (!isAdmin(token)) {
-            response.put("success", false);
-            response.put("message", "Unauthorized: Admin access required");
-            return ResponseEntity.status(403).body(response);
-        }
-
         try {
             doctorRepository.deleteById(id);
             response.put("success", true);
@@ -136,17 +106,10 @@ public class AdminController {
 
     @PostMapping("/hospitals")
     public ResponseEntity<Map<String, Object>> addHospital(
-            @RequestBody Hospital hospital,
-            @RequestHeader("Authorization") String token) {
+            @RequestBody Hospital hospital) {
         
         Map<String, Object> response = new HashMap<>();
         
-        if (!isAdmin(token)) {
-            response.put("success", false);
-            response.put("message", "Unauthorized: Admin access required");
-            return ResponseEntity.status(403).body(response);
-        }
-
         try {
             Hospital savedHospital = hospitalRepository.save(hospital);
             response.put("success", true);
@@ -163,17 +126,10 @@ public class AdminController {
     @PutMapping("/hospitals/{id}")
     public ResponseEntity<Map<String, Object>> updateHospital(
             @PathVariable String id,
-            @RequestBody Hospital hospital,
-            @RequestHeader("Authorization") String token) {
+            @RequestBody Hospital hospital) {
         
         Map<String, Object> response = new HashMap<>();
         
-        if (!isAdmin(token)) {
-            response.put("success", false);
-            response.put("message", "Unauthorized: Admin access required");
-            return ResponseEntity.status(403).body(response);
-        }
-
         try {
             Optional<Hospital> existingHospital = hospitalRepository.findById(id);
             if (!existingHospital.isPresent()) {
@@ -197,17 +153,10 @@ public class AdminController {
 
     @DeleteMapping("/hospitals/{id}")
     public ResponseEntity<Map<String, Object>> deleteHospital(
-            @PathVariable String id,
-            @RequestHeader("Authorization") String token) {
+            @PathVariable String id) {
         
         Map<String, Object> response = new HashMap<>();
         
-        if (!isAdmin(token)) {
-            response.put("success", false);
-            response.put("message", "Unauthorized: Admin access required");
-            return ResponseEntity.status(403).body(response);
-        }
-
         try {
             hospitalRepository.deleteById(id);
             response.put("success", true);
@@ -223,17 +172,10 @@ public class AdminController {
     // ==================== STATS ENDPOINT ====================
 
     @GetMapping("/stats")
-    public ResponseEntity<Map<String, Object>> getStats(
-            @RequestHeader("Authorization") String token) {
+    public ResponseEntity<Map<String, Object>> getStats() {
         
         Map<String, Object> response = new HashMap<>();
         
-        if (!isAdmin(token)) {
-            response.put("success", false);
-            response.put("message", "Unauthorized: Admin access required");
-            return ResponseEntity.status(403).body(response);
-        }
-
         try {
             long doctorCount = doctorRepository.count();
             long hospitalCount = hospitalRepository.count();

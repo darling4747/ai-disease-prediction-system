@@ -5,13 +5,14 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from predict_disease import DiseasePredictor
-import json
+from compare_models import compare_all_models, PRIMARY_MODEL
 
 app = Flask(__name__)
 CORS(app)
 
 # Initialize the disease predictor
 predictor = DiseasePredictor()
+_model_comparison_cache = None
 
 # Load the trained model
 try:
@@ -19,8 +20,8 @@ try:
     print("Model loaded successfully")
 except FileNotFoundError:
     print("Model not found. Training new model...")
-    # Train model if not exists
-    df = predictor.load_data('data/symptom_disease_dataset.csv')
+    # Train model if not exists using new Training.csv
+    df = predictor.load_data('Training.csv')
     X, y = predictor.preprocess_data(df)
     predictor.train_model(X, y)
     predictor.save_model('model/disease_predictor.pkl')
@@ -110,16 +111,46 @@ def get_diseases():
             'error': f'Failed to get diseases: {str(e)}'
         }), 500
 
+@app.route('/model/compare', methods=['GET'])
+def model_compare():
+    """Compare Random Forest, Logistic Regression, Naive Bayes, and SVM."""
+    global _model_comparison_cache
+    try:
+        if _model_comparison_cache is None:
+            _model_comparison_cache = compare_all_models('data/symptom_disease_dataset.csv')
+        return jsonify(_model_comparison_cache)
+    except Exception as e:
+        return jsonify({'error': f'Model comparison failed: {str(e)}'}), 500
+
+
 @app.route('/model/info', methods=['GET'])
 def model_info():
     """Get information about the trained model"""
     try:
+        global _model_comparison_cache
+        if _model_comparison_cache is None:
+            try:
+                _model_comparison_cache = compare_all_models('data/symptom_disease_dataset.csv')
+            except Exception:
+                _model_comparison_cache = None
+
+        comparison = _model_comparison_cache or {}
+        rf_metrics = next(
+            (m for m in comparison.get('models', []) if m.get('name') == PRIMARY_MODEL),
+            {}
+        )
+
         info = {
             'model_type': 'Random Forest Classifier',
+            'primary_model': PRIMARY_MODEL,
+            'supported_models': ['Random Forest', 'Logistic Regression', 'Naive Bayes', 'SVM'],
             'features': len(predictor.symptom_columns) if predictor.symptom_columns else 0,
             'symptoms': predictor.symptom_columns if predictor.symptom_columns else [],
             'classes': predictor.label_encoder_disease.classes_.tolist() if predictor.label_encoder_disease else [],
-            'status': 'trained' if predictor.model else 'not trained'
+            'status': 'trained' if predictor.model else 'not trained',
+            'accuracy': rf_metrics.get('test_accuracy'),
+            'cv_accuracy': rf_metrics.get('cv_accuracy'),
+            'model_comparison': comparison.get('models', []),
         }
         
         return jsonify(info)
@@ -162,6 +193,7 @@ if __name__ == '__main__':
     print("  GET  /symptoms - Get all available symptoms")
     print("  GET  /diseases - Get all diseases")
     print("  GET  /model/info - Get model information")
+    print("  GET  /model/compare - Compare ML models")
     print("  POST /retrain - Retrain the model")
     print("\nService running on http://localhost:5000")
     

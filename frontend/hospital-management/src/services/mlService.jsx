@@ -1,10 +1,10 @@
-import { mlApi } from './api';
+import { api } from './api';
 
 export const mlService = {
   // Get available symptoms
   async getSymptoms() {
     try {
-      const response = await mlApi.get('/symptoms');
+      const response = await api.get('/api/ml/symptoms');
       return response.data.symptoms || [];
     } catch (error) {
       console.error('Error fetching symptoms:', error);
@@ -20,7 +20,7 @@ export const mlService = {
   // Get available diseases
   async getDiseases() {
     try {
-      const response = await mlApi.get('/diseases');
+      const response = await api.get('/api/ml/diseases');
       return response.data.diseases || [];
     } catch (error) {
       console.error('Error fetching diseases:', error);
@@ -31,7 +31,7 @@ export const mlService = {
   // Predict diseases based on symptoms
   async predictDiseases(symptoms) {
     try {
-      const response = await mlApi.post('/predict', { symptoms });
+      const response = await api.post('/api/ml/predict', { symptoms });
       return response.data;
     } catch (error) {
       console.error('Error predicting diseases:', error);
@@ -39,10 +39,9 @@ export const mlService = {
     }
   },
 
-  // Get model information
   async getModelInfo() {
     try {
-      const response = await mlApi.get('/model/info');
+      const response = await api.get('/api/ml/model/info');
       return response.data;
     } catch (error) {
       console.error('Error fetching model info:', error);
@@ -50,10 +49,20 @@ export const mlService = {
     }
   },
 
+  async compareModels() {
+    try {
+      const response = await api.get('/api/ml/model/compare');
+      return response.data;
+    } catch (error) {
+      console.error('Error comparing models:', error);
+      return { models: [] };
+    }
+  },
+
   // Health check
   async healthCheck() {
     try {
-      const response = await mlApi.get('/health');
+      const response = await api.get('/api/ml/health');
       return response.data;
     } catch (error) {
       console.error('ML service health check failed:', error);

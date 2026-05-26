@@ -2,10 +2,13 @@ package com.example.hospital.config;
 
 import com.example.hospital.model.Doctor;
 import com.example.hospital.model.Hospital;
+import com.example.hospital.model.User;
 import com.example.hospital.repository.DoctorRepository;
 import com.example.hospital.repository.HospitalRepository;
+import com.example.hospital.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -20,10 +23,53 @@ public class DataSeeder implements CommandLineRunner {
     @Autowired
     private HospitalRepository hospitalRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public void run(String... args) {
+        seedUsers();
         seedHospitals();
         seedDoctors();
+    }
+
+    private void seedUsers() {
+        if (userRepository.count() == 0) {
+            System.out.println("Seeding users...");
+            
+            // Create default admin user
+            User admin = new User();
+            admin.setFirstName("Admin");
+            admin.setLastName("User");
+            admin.setEmail("admin@hospital.com");
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setRole("ADMIN");
+            userRepository.save(admin);
+            System.out.println("Created admin user: admin@hospital.com / admin123");
+            
+            // Create default doctor user
+            User doctor = new User();
+            doctor.setFirstName("Doctor");
+            doctor.setLastName("Smith");
+            doctor.setEmail("doctor@hospital.com");
+            doctor.setPassword(passwordEncoder.encode("doctor123"));
+            doctor.setRole("DOCTOR");
+            userRepository.save(doctor);
+            System.out.println("Created doctor user: doctor@hospital.com / doctor123");
+            
+            // Create default patient user
+            User patient = new User();
+            patient.setFirstName("Patient");
+            patient.setLastName("John");
+            patient.setEmail("patient@hospital.com");
+            patient.setPassword(passwordEncoder.encode("patient123"));
+            patient.setRole("PATIENT");
+            userRepository.save(patient);
+            System.out.println("Created patient user: patient@hospital.com / patient123");
+        }
     }
 
     private void seedHospitals() {
@@ -73,6 +119,12 @@ public class DataSeeder implements CommandLineRunner {
             String heartCareId = hospitals.get(1).getId();
             String neuroId = hospitals.get(2).getId();
 
+            Doctor generalPhysician = createDoctor("Dr. David Thompson", "General Physician", "General Medicine", 20,
+                heartCareId, "Heart Care Center", 4.7, "MD",
+                Arrays.asList("MD", "Family Medicine"), "Tomorrow 9:30 AM", "$80",
+                Arrays.asList("English"), true);
+            generalPhysician.setEmail("doctor@hospital.com");
+
             List<Doctor> doctors = Arrays.asList(
                 createDoctor("Dr. Sarah Johnson", "Cardiologist", "Cardiology", 15, 
                     heartCareId, "Heart Care Center", 4.8, "MD", 
@@ -99,10 +151,7 @@ public class DataSeeder implements CommandLineRunner {
                     Arrays.asList("MD", "Cosmetic Dermatology"), "Tomorrow 3:00 PM", "$120",
                     Arrays.asList("English", "Spanish"), true),
                 
-                createDoctor("Dr. David Thompson", "General Physician", "General Medicine", 20,
-                    heartCareId, "Heart Care Center", 4.7, "MD",
-                    Arrays.asList("MD", "Family Medicine"), "Tomorrow 9:30 AM", "$80",
-                    Arrays.asList("English"), true),
+                generalPhysician,
                 
                 createDoctor("Dr. Amanda White", "Gynecologist", "Gynecology", 14,
                     cityGeneralId, "City General Hospital", 4.8, "MD, FACOG",
@@ -117,6 +166,15 @@ public class DataSeeder implements CommandLineRunner {
             
             doctorRepository.saveAll(doctors);
             System.out.println("Seeded " + doctors.size() + " doctors");
+        } else {
+            doctorRepository.findBySpecialization("General Physician").stream()
+                .findFirst()
+                .ifPresent(doctor -> {
+                    if (!"doctor@hospital.com".equalsIgnoreCase(doctor.getEmail())) {
+                        doctor.setEmail("doctor@hospital.com");
+                        doctorRepository.save(doctor);
+                    }
+                });
         }
     }
 

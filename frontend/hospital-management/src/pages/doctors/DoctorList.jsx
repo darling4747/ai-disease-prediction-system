@@ -16,6 +16,8 @@ import {
   Box
 } from '@mui/material';
 import { Search } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import authService, { normalizeRole } from '../../services/authService';
 import doctorService from '../../services/doctorService';
 
 const DoctorList = () => {
@@ -23,6 +25,8 @@ const DoctorList = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialization, setSelectedSpecialization] = useState('');
+  const navigate = useNavigate();
+  const isPatient = normalizeRole(authService.getCurrentUser()?.role) === 'PATIENT';
 
   const specializations = [
     'General Practitioner',
@@ -61,19 +65,8 @@ const DoctorList = () => {
     }
   };
 
-  const handleBookAppointment = async (doctorId) => {
-    try {
-      await doctorService.bookAppointment({
-        doctorId,
-        userId: 'user123',
-        date: new Date().toISOString(),
-        status: 'scheduled'
-      });
-      alert('Appointment booked successfully!');
-    } catch (error) {
-      console.error('Error booking appointment:', error);
-      alert('Failed to book appointment');
-    }
+  const handleBookAppointment = () => {
+    navigate('/appointments');
   };
 
   if (loading) {
@@ -150,7 +143,7 @@ const DoctorList = () => {
                 </Typography>
                 
                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {doctor.hospital.name}
+                  {typeof doctor.hospital === 'object' ? doctor.hospital?.name : doctor.hospital || 'Hospital not assigned'}
                 </Typography>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -166,13 +159,15 @@ const DoctorList = () => {
                     color={doctor.available ? 'success' : 'default'}
                     size="small"
                   />
-                  <Button
-                    variant="outlined"
-                    disabled={!doctor.available}
-                    onClick={() => handleBookAppointment(doctor.id)}
-                  >
-                    Book Appointment
-                  </Button>
+                  {isPatient && (
+                    <Button
+                      variant="outlined"
+                      disabled={!doctor.available}
+                      onClick={handleBookAppointment}
+                    >
+                      Book Appointment
+                    </Button>
+                  )}
                 </Box>
               </CardContent>
             </Card>

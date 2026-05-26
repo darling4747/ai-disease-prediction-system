@@ -10,9 +10,11 @@ import {
   Alert
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -33,32 +35,8 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-
-      const data = await response.json();
-      
-      // Store user info in localStorage
-      localStorage.setItem('user', JSON.stringify({
-        email: formData.email,
-        role: data.role || 'patient',
-        token: data.token,
-        userId: data.userId
-      }));
-      
-      navigate('/');
+      const data = await login(formData.email, formData.password);
+      navigate(data?.role === 'ADMIN' ? '/admin' : '/dashboard');
     } catch (err) {
       setError('Login failed. Please check your credentials.');
     } finally {

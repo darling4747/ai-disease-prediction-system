@@ -41,7 +41,7 @@ public class AuthController {
             user.setLastName(request.getLastName());
             user.setEmail(request.getEmail());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setRole(request.getRole() != null ? request.getRole() : "PATIENT");
+            user.setRole(normalizeRole(request.getRole()));
             
             User savedUser = userRepository.save(user);
             
@@ -194,4 +194,17 @@ public class AuthController {
         public String getPassword() { return password; }
         public void setPassword(String password) { this.password = password; }
     }
+
+    private String normalizeRole(String role) {
+        if (role == null || role.isBlank()) {
+            return "PATIENT";
+        }
+
+        String normalized = role.replace("ROLE_", "").trim().toUpperCase();
+        return switch (normalized) {
+            case "PATIENT", "DOCTOR", "ADMIN" -> normalized;
+            default -> "PATIENT";
+        };
+    }
+
 }

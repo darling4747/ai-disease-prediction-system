@@ -1,8 +1,8 @@
 import axios from 'axios';
+import authService from './authService';
+import { getApiBaseUrl } from './apiConfig';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
-const ML_SERVICE_URL = process.env.REACT_APP_ML_SERVICE_URL || 'http://localhost:5000';
-
+const API_BASE_URL = getApiBaseUrl();
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -11,17 +11,13 @@ const api = axios.create({
   timeout: 10000,
 });
 
-const mlApi = axios.create({
-  baseURL: ML_SERVICE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 15000,
-});
-
-// Request interceptor for logging
+// Request interceptor for JWT token and logging
 api.interceptors.request.use(
   (config) => {
+    const token = authService.getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`, config.data);
     return config;
   },
@@ -43,5 +39,5 @@ api.interceptors.response.use(
   }
 );
 
-export { api, mlApi };
+export { api };
 export default api;

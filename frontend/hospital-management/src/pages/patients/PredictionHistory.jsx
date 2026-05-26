@@ -16,6 +16,8 @@ import {
   Grid
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import authService from '../../services/authService';
+import predictionService from '../../services/predictionService';
 
 const PredictionHistory = () => {
   const [predictions, setPredictions] = useState([]);
@@ -29,34 +31,15 @@ const PredictionHistory = () => {
 
   const fetchPredictionHistory = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/predictions/user/user123');
-      if (!response.ok) {
-        throw new Error('Failed to fetch prediction history');
-      }
-      const data = await response.json();
+      const currentUser = authService.getCurrentUser();
+      const data = currentUser?.role === 'DOCTOR'
+        ? await predictionService.getAllPredictions()
+        : await predictionService.getPredictionHistory(currentUser?.userId);
       setPredictions(data);
     } catch (err) {
       console.error('Error fetching history:', err);
       setError('Failed to load prediction history');
-      
-      setPredictions([
-        {
-          id: '1',
-          userId: 'user123',
-          symptoms: ['Fever', 'Cough', 'Headache'],
-          predictions: [
-            {
-              name: 'Common Cold',
-              probability: 0.85,
-              severity: 'low',
-              doctorSpecialization: 'General Practitioner',
-              hospitalDepartment: 'Outpatient'
-            }
-          ],
-          timestamp: new Date(Date.now() - 86400000).toISOString(),
-          status: 'completed'
-        }
-      ]);
+      setPredictions([]);
     } finally {
       setLoading(false);
     }
@@ -92,7 +75,7 @@ const PredictionHistory = () => {
           Prediction History
         </Typography>
         <Typography variant="body1" color="text.secondary" paragraph>
-          View your past disease predictions and track your health journey.
+          MongoDB-backed prediction history with health reports and medicine guidance.
         </Typography>
 
         <Button
@@ -134,7 +117,7 @@ const PredictionHistory = () => {
                       Symptoms:
                     </Typography>
                     <Box sx={{ mb: 2 }}>
-                      {prediction.symptoms.map((symptom, index) => (
+                      {(prediction.symptoms || []).map((symptom, index) => (
                         <Chip
                           key={index}
                           label={symptom}
@@ -150,7 +133,7 @@ const PredictionHistory = () => {
                       Predictions:
                     </Typography>
                     <List dense>
-                      {prediction.predictions.map((pred, index) => (
+                      {(prediction.predictions || []).map((pred, index) => (
                         <ListItem key={index} sx={{ px: 0 }}>
                           <ListItemText
                             primary={
@@ -181,14 +164,37 @@ const PredictionHistory = () => {
                       ))}
                     </List>
 
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={() => navigate('/recommendations')}
-                      sx={{ mt: 2 }}
-                    >
-                      Find Doctors
-                    </Button>
+                    {prediction.metadata?.medicalAdvice && (
+                      <Alert severity="info" sx={{ mt: 1, mb: 1 }}>
+                        Doctor advice: {prediction.metadata.medicalAdvice}
+                      </Alert>
+                    )}
+
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => navigate(`/health-report/${prediction.id}`)}
+                      >
+                        Health Report
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => navigate('/medicines', {
+                          state: { disease: prediction.predictions?.[0]?.name },
+                        })}
+                      >
+                        Medicines
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => navigate('/recommendations')}
+                      >
+                        Find Doctors
+                      </Button>
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>

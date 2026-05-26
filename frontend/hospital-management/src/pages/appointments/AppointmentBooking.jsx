@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -16,10 +16,6 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   List,
   ListItem,
   ListItemText,
@@ -41,7 +37,6 @@ import {
 } from '@mui/icons-material';
 import appointmentService from '../../services/appointmentService';
 import doctorService from '../../services/doctorService';
-import hospitalService from '../../services/hospitalService';
 
 const AppointmentBooking = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -52,13 +47,11 @@ const AppointmentBooking = () => {
   // Data states
   const [doctors, setDoctors] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
-  const [hospitals, setHospitals] = useState([]);
   const [myAppointments, setMyAppointments] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
 
   // Form states
   const [selectedDoctor, setSelectedDoctor] = useState('');
-  const [selectedHospital, setSelectedHospital] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [symptoms, setSymptoms] = useState('');
@@ -76,13 +69,11 @@ const AppointmentBooking = () => {
   const loadData = async () => {
     setDataLoading(true);
     try {
-      const [doctorsData, hospitalsData, appointmentsData] = await Promise.all([
+      const [doctorsData, appointmentsData] = await Promise.all([
         doctorService.getDoctors(),
-        hospitalService.getHospitals(),
         appointmentService.getMyAppointments()
       ]);
       setDoctors(doctorsData || []);
-      setHospitals(hospitalsData || []);
       setMyAppointments(appointmentsData?.appointments || []);
     } catch (error) {
       setMessage({ type: 'error', text: error.message || 'Failed to load data' });
@@ -96,7 +87,7 @@ const AppointmentBooking = () => {
     setMessage({ type: '', text: '' });
   };
 
-  const loadAvailableSlots = async () => {
+  const loadAvailableSlots = useCallback(async () => {
     if (!selectedDoctor || !selectedDate) return;
     
     try {
@@ -105,13 +96,13 @@ const AppointmentBooking = () => {
     } catch (error) {
       setMessage({ type: 'error', text: error.message || 'Failed to load slots' });
     }
-  };
+  }, [selectedDoctor, selectedDate]);
 
   useEffect(() => {
     if (selectedDoctor && selectedDate) {
       loadAvailableSlots();
     }
-  }, [selectedDoctor, selectedDate]);
+  }, [selectedDoctor, selectedDate, loadAvailableSlots]);
 
   const handleNext = () => {
     if (activeStep === 0 && !selectedDoctor) {
@@ -452,7 +443,7 @@ const AppointmentBooking = () => {
                     <Button
                       variant="contained"
                       onClick={handleNext}
-                      disabled={doctors.length === 0 || activeStep === 0 && !selectedDoctor}
+                      disabled={doctors.length === 0 || (activeStep === 0 && !selectedDoctor)}
                     >
                       Next
                     </Button>

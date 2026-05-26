@@ -23,7 +23,7 @@ public class DoctorService {
     }
 
     public List<Doctor> getDoctorsBySpecialization(String specialization) {
-        return doctorRepository.findBySpecialization(specialization);
+        return doctorRepository.findBySpecializationRegex(specialization);
     }
 
     public List<Doctor> getDoctorsByDepartment(String department) {
@@ -87,6 +87,14 @@ public class DoctorService {
             doctors = getAllDoctors();
         }
 
+        if (doctors.isEmpty() && recommendedSpecialization != null && recommendedSpecialization.contains("General")) {
+            doctors = getDoctorsBySpecialization("General");
+        }
+
+        if (doctors.isEmpty()) {
+            doctors = getAllDoctors();
+        }
+
         // Filter by location if provided
         if (location != null && !location.trim().isEmpty()) {
             doctors = doctors.stream()
@@ -118,7 +126,7 @@ public class DoctorService {
             case "common cold":
             case "flu":
             case "influenza":
-                return "General Practitioner";
+                return "General";
             case "heart attack":
                 return "Cardiologist";
             case "migraine":

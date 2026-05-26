@@ -110,12 +110,6 @@ disease_symptoms = {
     'Neonatal Hypoglycemia': ['lethargy', 'poor feeding', 'seizures', 'coma'],
     'Neonatal Respiratory Distress': ['rapid breathing', 'grunting', 'nasal flaring', 'chest retractions'],
     'Neonatal Meningitis': ['fever', 'lethargy', 'poor feeding', 'seizures', 'bulging fontanelle'],
-    'Neonatal Pneumonia': ['fever', 'cough', 'rapid breathing', 'grunting', 'chest retractions'],
-    'Neonatal Sepsis': ['fever', 'lethargy', 'poor feeding', 'breathing difficulties', 'seizures'],
-    'Neonatal Jaundice': ['yellow skin', 'yellow eyes', 'dark urine', 'pale stools'],
-    'Neonatal Hypoglycemia': ['lethargy', 'poor feeding', 'seizures', 'coma'],
-    'Neonatal Respiratory Distress': ['rapid breathing', 'grunting', 'nasal flaring', 'chest retractions'],
-    'Neonatal Meningitis': ['fever', 'lethargy', 'poor feeding', 'seizures', 'bulging fontanelle'],
     'Neonatal Pneumonia': ['fever', 'cough', 'rapid breathing', 'grunting', 'chest retractions']
 }
 
