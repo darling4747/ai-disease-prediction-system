@@ -106,9 +106,13 @@ class DiseasePredictor:
         
         # Print classification report
         print("\nClassification Report:")
+        # Dynamically map target names to the actual classes present in the test set to avoid size mismatches
+        unique_classes = np.unique(np.concatenate((y_test, y_pred)))
+        target_names = [self.label_encoder_disease.classes_[i] for i in unique_classes]
         print(classification_report(
             y_test, y_pred, 
-            target_names=self.label_encoder_disease.classes_
+            labels=unique_classes,
+            target_names=target_names
         ))
     
     def predict_diseases(self, symptoms: List[str]) -> List[Dict]:
