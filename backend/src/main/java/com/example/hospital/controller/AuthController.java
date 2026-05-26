@@ -8,6 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -26,101 +30,79 @@ public class AuthController {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        try {
-            // Check if email already exists
-            if (userRepository.existsByEmail(request.getEmail())) {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "Email already registered");
-                return ResponseEntity.badRequest().body(error);
-            }
-            
-            // Create new user
-            User user = new User();
-            user.setFirstName(request.getFirstName());
-            user.setLastName(request.getLastName());
-            user.setEmail(request.getEmail());
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-            user.setRole(normalizeRole(request.getRole()));
-            
-            User savedUser = userRepository.save(user);
-            
-            // Generate token
-            String token = jwtService.generateToken(
-                savedUser.getId(),
-                savedUser.getEmail(),
-                savedUser.getRole()
-            );
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("userId", savedUser.getId());
-            response.put("email", savedUser.getEmail());
-            response.put("role", savedUser.getRole());
-            response.put("firstName", savedUser.getFirstName());
-            response.put("lastName", savedUser.getLastName());
-            response.put("message", "Registration successful");
-            
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Registration failed: " + e.getMessage());
-            return ResponseEntity.badRequest().body(error);
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        // Check if email already exists
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email already registered");
         }
+        
+        // Create new user
+        User user = new User();
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(normalizeRole(request.getRole()));
+        
+        User savedUser = userRepository.save(user);
+        
+        // Generate token
+        String token = jwtService.generateToken(
+            savedUser.getId(),
+            savedUser.getEmail(),
+            savedUser.getRole()
+        );
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("userId", savedUser.getId());
+        response.put("email", savedUser.getEmail());
+        response.put("role", savedUser.getRole());
+        response.put("firstName", savedUser.getFirstName());
+        response.put("lastName", savedUser.getLastName());
+        response.put("message", "Registration successful");
+        
+        return ResponseEntity.ok(response);
     }
     
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try {
-            // Find user by email
-            Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
-            
-            if (userOpt.isEmpty()) {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "Invalid email or password");
-                return ResponseEntity.status(401).body(error);
-            }
-            
-            User user = userOpt.get();
-            
-            // Verify password
-            if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "Invalid email or password");
-                return ResponseEntity.status(401).body(error);
-            }
-            
-            // Check if user is active
-            if (!user.isActive()) {
-                Map<String, String> error = new HashMap<>();
-                error.put("message", "Account is deactivated");
-                return ResponseEntity.status(401).body(error);
-            }
-            
-            // Generate token
-            String token = jwtService.generateToken(
-                user.getId(),
-                user.getEmail(),
-                user.getRole()
-            );
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("userId", user.getId());
-            response.put("email", user.getEmail());
-            response.put("role", user.getRole());
-            response.put("firstName", user.getFirstName());
-            response.put("lastName", user.getLastName());
-            response.put("message", "Login successful");
-            
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Login failed: " + e.getMessage());
-            return ResponseEntity.badRequest().body(error);
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+        // Find user by email
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
+        
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("Invalid email or password");
         }
+        
+        User user = userOpt.get();
+        
+        // Verify password
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+        
+        // Check if user is active
+        if (!user.isActive()) {
+            throw new IllegalArgumentException("Account is deactivated");
+        }
+        
+        // Generate token
+        String token = jwtService.generateToken(
+            user.getId(),
+            user.getEmail(),
+            user.getRole()
+        );
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("userId", user.getId());
+        response.put("email", user.getEmail());
+        response.put("role", user.getRole());
+        response.put("firstName", user.getFirstName());
+        response.put("lastName", user.getLastName());
+        response.put("message", "Login successful");
+        
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/me")
@@ -162,10 +144,22 @@ public class AuthController {
     
     // Request DTOs
     public static class RegisterRequest {
+        @NotBlank(message = "First name is required")
+        @Size(min = 2, max = 50, message = "First name must be between 2 and 50 characters")
         private String firstName;
+        
+        @NotBlank(message = "Last name is required")
+        @Size(min = 2, max = 50, message = "Last name must be between 2 and 50 characters")
         private String lastName;
+        
+        @NotBlank(message = "Email is required")
+        @Email(message = "Please provide a valid email address")
         private String email;
+        
+        @NotBlank(message = "Password is required")
+        @Size(min = 6, message = "Password must be at least 6 characters long")
         private String password;
+        
         private String role;
         
         public String getFirstName() { return firstName; }
@@ -185,7 +179,11 @@ public class AuthController {
     }
     
     public static class LoginRequest {
+        @NotBlank(message = "Email is required")
+        @Email(message = "Please provide a valid email address")
         private String email;
+        
+        @NotBlank(message = "Password is required")
         private String password;
         
         public String getEmail() { return email; }
