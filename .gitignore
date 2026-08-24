@@ -33,8 +33,22 @@ yarn-error.log*
 dist/
 build/
 target/
+.next/
+
+# Test and tool caches
+.pytest_cache/
+.mypy_cache/
+.cache/
 
 # Environment variables
 .env
 .env.local
 .env.*.local
+
+# Secret and credential files
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
